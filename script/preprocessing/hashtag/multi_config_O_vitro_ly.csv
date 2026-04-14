@@ -1,0 +1,17 @@
+[gene-expression]
+reference,/project2/sli68423_1316/users/yang/reference/10x/refdata-gex-mm10-2020-A
+create-bam,true
+
+[feature]
+reference,/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/Preprocessing_Scripts/Cell_Ranger/Cell_Ranger_Multi/u01_feature_ref.csv
+
+[libraries]
+fastq_id,fastqs,feature_types
+Old_Vitro_GEX,/project2/sli68423_1316/projects/U01_aim2/raw_data/cross_exp/cross_exp_gex_v2/,Gene Expression
+Old_CSP,/project2/sli68423_1316/projects/U01_aim2/raw_data/cross_exp/L2_GEX_CSP/DeGregori_09242024_1_CSP/,Antibody Capture
+
+[samples]
+sample_id,hashtag_ids
+Rep1,B0301
+Rep2,B0302
+Rep3,B0303

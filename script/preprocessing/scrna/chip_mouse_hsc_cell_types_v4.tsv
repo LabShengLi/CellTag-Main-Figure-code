@@ -1,0 +1,66 @@
+SN	Celltype	Marker
+1	LT-HSC	Mecom
+2	LT-HSC	Mllt3
+3	LT-HSC	Pdzk1ip1
+4	LT-HSC	Vwf
+5	LT-HSC	Sult1a1
+6	ST-HSC	Angpt1
+7	ST-HSC	Ifitm1
+8	ST-HSC	Meis1
+16	ST-HSC;MPP;CMP;GMP/MDP	Cd34
+18	MPP;LMPP	Dntt
+17	MPP;LMPP	Flt3
+9	LT-HSC;ST-HSC;MPP	Esam
+10	LT-HSC;ST-HSC;MPP	Hlf
+11	LT-HSC;ST-HSC;MPP	Ly6a
+12	LT-HSC;ST-HSC;MPP	Procr
+13	LT-HSC;ST-HSC;MPP	Cdkn1c
+14	LT-HSC;MkP	Itga2b
+15	LT-HSC;ST-HSC;MkP	Mpl
+37	MEP	Epor
+38	MEP	Gata1
+40	MEP	Klf1
+41	MEP	Mfsd2b
+43	MkP	Gp5
+44	MkP	Pf4
+45	EryP	Vamp5
+45	EryP	Car1
+46	EryP	Car2
+49	EryP	Tfrc
+50	EryP	Blvrb
+51	EryP	Rhd
+52	EryP	Mt1
+52	EryP	Mt2
+52	EryP	Casp3
+52	EryP	Csrp3
+20	GMP/MDP	Elane
+21	GMP/MDP	Cebpa
+22	GMP/MDP	Csf1r
+23	GMP/MDP	Irf8
+24	GMP/MDP	Mpo
+25	GMP/MDP	Prtn3
+28	GMP/MDP	Fcgr3
+29	GMP/MDP;CMP	Lgals1
+31	Ba	Ms4a2
+32	Ba	Cpa3
+33	Ba	Fcer1a
+52	DC	Ccr2
+54	DC	Cst3
+62	DC	Tlr3
+63	DC	Xcr1
+67	Granulocyte	Cebpe
+70	Granulocyte	Itgam
+73	Granulocyte	Ly6g
+74	Granulocyte	Lyz2
+75	Granulocyte	Ngp
+79	Mac	C1qa
+80	Mac	C1qb
+81	Mac	C1qc
+83	Mac	Hmox1
+85	Mac	Vcam1
+86	T cell	Il7r
+87	T cell	Tcf7
+90	B cell	Ebf1
+91	B cell	Pax5
+92	B cell	Cd19
+94	B cell	Rag1
