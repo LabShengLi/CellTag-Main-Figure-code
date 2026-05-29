@@ -1,3 +1,15 @@
-Example input data for reproducing the manuscript analyses can be obtained from the associated public data repository (GEO accession: XXXXXXX).
+### Input Data
 
-Users may substitute their own datasets following the formats described in the manuscript.
+The analyses in this repository are based on publicly available scRNA-seq datasets deposited in the Gene Expression Omnibus (GEO):
+
+* GSE325995 (Unmanipulated scRNA-seq)
+* GSE327449 (CellTag scRNA-seq Experiment 1)
+* GSE326529 (CellTag and Hashtag scRNA-seq Experiment 2)
+
+### Processed Data
+
+Preprocessed RDS files used for the analyses are available on Zenodo:
+
+**Zenodo:** [insert Zenodo link here]
+
+Additional metadata fields are described in the manuscript and can be inspected directly from the RDS objects.
