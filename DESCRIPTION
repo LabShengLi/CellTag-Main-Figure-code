@@ -1,0 +1,37 @@
+## System requirements
+
+### Software
+
+The code was developed and tested using:
+
+* R version 4.4.3
+
+### Operating system
+
+Tested on:
+
+* Rocky Linux 8.10 (Open OnDemand HPC environment)
+
+### Hardware requirements
+
+No specialized hardware is required. Large-scale single-cell analyses may benefit from access to a high-memory computing environment.
+
+### Main R package dependencies
+
+* Seurat (v5.5.0)
+* SeuratObject (v5.4.0)
+* harmony (v2.0.2)
+* ggplot2 (v4.0.3)
+* dplyr (v1.2.1)
+* tidyr (v1.3.2)
+* patchwork (v1.3.2)
+* cowplot (v1.2.0)
+* ComplexHeatmap (v2.22.0)
+* circlize (v0.4.18)
+* ggpubr (v0.6.3)
+* ggrepel (v0.9.8)
+* pheatmap (v1.0.13)
+* SingleCellExperiment (v1.28.1)
+* scuttle (v1.16.0)
+* limma (v3.62.2)
+* edgeR (v4.4.2)
