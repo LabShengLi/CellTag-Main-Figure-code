@@ -578,13 +578,13 @@ plot_variance_cv_summaries <- function(
   # Top genes increased in g2
   top_up_g2 <- df_vol_mvar %>%
     filter(significance == paste0("↑", g2)) %>%
-    arrange(.data[[fdr_col]], desc(.data[[fc_col]])) %>%   # significance first
+    arrange(.data[[fdr_col]], desc(.data[[fc_col]])) %>%   
     slice_head(n = 10)
   
   # Top genes increased in g1
   top_up_g1 <- df_vol_mvar %>%
     filter(significance == paste0("↑", g1)) %>%
-    arrange(.data[[fdr_col]], .data[[fc_col]]) %>%         # significance first
+    arrange(.data[[fdr_col]], .data[[fc_col]]) %>%         
     slice_head(n = 10)
   
   top_genes_mvar <- bind_rows(top_up_g2, top_up_g1) %>%
