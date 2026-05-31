@@ -11,8 +11,6 @@
 
 ##########################
 
-setwd('/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts')
-
 ## Load packages ##
 
 load_all_packages <- function() {
@@ -31,7 +29,7 @@ load_all_packages <- function() {
 load_all_packages()
 
 # set working directory
-setwd('/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Figure3/Tables/')
+setwd('...')
 
 ########################################
 
@@ -281,7 +279,7 @@ gsea_Day0_all <- run_msigdb_gsea_all_collections(
 )
 Day0_GSEA_results <- gsea_Day0_all$gsea_summary_table
 
-out_dir <- "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Figure3/Tables/GSEA"
+out_dir <- ".../GSEA"
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 write.xlsx(gsea_Day0_all$gsea_summary_table, file = file.path(out_dir, "GSEA_Day0_all_genes_Enriched_Pathways.xlsx"), overwrite = TRUE)
 
@@ -302,7 +300,7 @@ Day0_Unmani_shared_genes_GSEA_results <- gsea_Day0_shared_validation$gsea_summar
 View(Day0_Unmani_shared_genes_GSEA_results)
 
 # Save the excel
-out_dir <- "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Figure3/Tables/GSEA"
+out_dir <- ".../GSEA"
 write.xlsx(gsea_Day0_shared_validation$gsea_summary_table, file = file.path(out_dir, "GSEA_Day0_Unmani_shared_genes_Enriched_Pathways.xlsx"), overwrite = TRUE)
 
 
@@ -334,11 +332,11 @@ Day0_Unmani_shared_genes_combined_GSEA_results
 # Read in the two GSEA tables 
 
 
-Day0_GSEA <- '/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Figure3/Tables/GSEA/GSEA_Day0_all_genes_Enriched_Pathways.xlsx'
+Day0_GSEA <- '.../GSEA_Day0_all_genes_Enriched_Pathways.xlsx'
 Day0_GSEA_results <- read_excel(Day0_GSEA, sheet = 1)
 Day0_GSEA_results # 8800 rows 
 
-Day0_Unmani_shared_genes_GSEA <- '/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Figure3/Tables/GSEA/GSEA_Day0_Unmani_shared_genes_Enriched_Pathways.xlsx'
+Day0_Unmani_shared_genes_GSEA <- '.../GSEA_Day0_Unmani_shared_genes_Enriched_Pathways.xlsx'
 Day0_Unmani_shared_genes_GSEA_results <- read_excel(Day0_Unmani_shared_genes_GSEA, sheet = 1)
 Day0_Unmani_shared_genes_GSEA_results # 1338 rows 
 
