@@ -1,7 +1,7 @@
 #######################################################################################
 
 
-# Compute Output Activity (OA) for CrossAge, Exp1 and Exp2 vitro data
+# Compute Output Activity (OA) for CrossAge and Exp2 vitro data
 
 
 #######################################################################################
@@ -10,13 +10,6 @@
 # Last updated: 02/03/2026
 
 ##########################
-
-setwd('/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts')
-
-# save in 
-
-# /project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/test_folder/Updated_main_figures_0223
-
 
 ## Load packages ##
 
@@ -36,8 +29,7 @@ load_all_packages <- function() {
 load_all_packages()
 
 # set working directory
-setwd('/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Figure1/OA_pipeline_out/')
-
+# setwd('...')
 ################################
 
 ### Define low and high output markers ###
@@ -70,7 +62,7 @@ high_output_markers <- c(
 
 # All genes detetced in Rodriguez-Fraticelli et al. (background genes for hypergeometric test)
 
-cellstem_path <- "/project2/sli68423_1316/users/chris/Celltag/HSC_heterogenecity/DEG_clonal_behaviors/Figure1_low_high_OA_Exp1_Exp2/Cell_Stem_Cell_and_nature_DEG_list/cell_stem_cell_deg_list.xlsx"
+cellstem_path <- "file_input/cell_stem_cell_deg_list.xlsx"
 
 cellstem_df <- openxlsx::read.xlsx(cellstem_path, sheet = 2)
 
@@ -79,29 +71,19 @@ cellstem_genes <-  unique(cellstem_df$gene) # 4789 genes
 
 ###############################################################################
 
-# Read in CrossAge, Unmanipulated, Exp1 and Exp2 data 
+# Read in CrossAge, Unmanipulated and Exp2 data 
 
 #### Read in CrossAge data ####
 
-seurat_in_vivo_day60 <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vivo.RDS"
-)
+seurat_in_vivo_day60 <- readRDS("data/CrossAge(exp2)_vivo.RDS")
+seurat_in_vitro_day0 <- readRDS("data/CrossAge(exp2)_vitro.RDS")
 
-seurat_in_vitro_day0 <- readRDS("/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vitro.RDS")
-
-#### Read in Exp1 and Exp2 data ####
+#### Read in Exp2 data ####
 
 # In vitro 
-
-# seurat_vitro_exp1 <- readRDS('/project2/sli68423_1316/users/chris/Celltag/HSC_heterogenecity/DEG_clonal_behaviors/Figure1_low_high_OA_Exp1_Exp2/seurat_vitro_exp1.rds')
-
-seurat_vitro_exp2 <- readRDS('/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/Exp2_vitro_final.RDS')
-
+seurat_vitro_exp2 <- readRDS("data/Exp2(exp1)_vitro.RDS")
 # In vivo 
-
-# seurat_vivo_exp1 <- readRDS('/project2/sli68423_1316/users/chris/Celltag/HSC_heterogenecity/DEG_clonal_behaviors/Figure1_low_high_OA_Exp1_Exp2/seurat_vivo_exp1.rds')
-
-seurat_vivo_exp2 <- readRDS('//project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/Exp2_vivo_final.RDS')
+seurat_vivo_exp2 <- readRDS("data/Exp2(exp1)_vivo.RDS")
 
 ######################################################
 
@@ -149,27 +131,22 @@ celltype_colors <- c(
 
 
 celltype_colors <- c(
-  
   # Stem / early
   "HSC"  = "#E76F51",   # deep red
   "MPP"  = "#F4A261",   # teal-green
   "CMP"  = "#8C973E",   # warm brown
-  
   # Myeloid / progenitors
   "GMP"  = "#007F5F",   # dark green
   "MEP"  = "#6A994E",   # olive green
   "MkP"  = "#277DA1",   # steel blue
   "EryP" = "#F08080",   # strong red
-  
   # Immune / differentiated
   "DC"           = "#9C6644",  # brown
   "Mac"          = "#6D4C41",  # dark brown
   "Granulocyte"  = "#6C8EBF",  # strong blue
-  
   # Lymphoid
   "B_cell" = "#B565D9",  # purple
   "T_cell" = "#4361EE",  # royal blue
-  
   # Mast
   "Mast" = "#D98BB8"     # magenta
 )
@@ -215,9 +192,9 @@ run_clonewise_DEG_suite <- function(
   dir.create(run_folder, recursive = TRUE, showWarnings = FALSE)
   excel_path   <- file.path(run_folder, excel_name)
   volcano_path <- file.path(run_folder, volcano_name)
-  message(glue("📁 Output directory created: {run_folder}"))
+  message(glue("Output directory created: {run_folder}"))
   # ============================================================
-  # 0️⃣ Assign group labels based on CloneID
+  # step0: Assign group labels based on CloneID
   # ============================================================
   seurat_obj$group_label <- NA_character_
   seurat_obj$group_label[seurat_obj[[clone_col]][, 1] %in% clone_set1_ids] <- "Group1"
@@ -228,7 +205,7 @@ run_clonewise_DEG_suite <- function(
   n2 <- sum(seurat_sub$group_label == "Group2")
   message(glue("🧬 Clone-wise DEG: {n1} {group1_label} cells vs {n2} {group2_label} cells"))
   # ============================================================
-  # 1️⃣ Helper: adjust FDR & append avg expression
+  # step 1: Helper: adjust FDR & append avg expression
   # ============================================================
   adjust_and_append_avg <- function(deg_df, obj, features) {
     if (is.null(deg_df) || nrow(deg_df) == 0) return(tibble())
@@ -249,7 +226,7 @@ run_clonewise_DEG_suite <- function(
     left_join(deg_df, ae_df, by = "gene")
   }
   # ============================================================
-  # 2️⃣ Helper: run one DEG method
+  # step 2: Helper: run one DEG method
   # ============================================================
   do_one_deg <- function(obj, features, method = "wilcox") {
     if (length(features) == 0) return(tibble())
@@ -264,7 +241,7 @@ run_clonewise_DEG_suite <- function(
     )
   }
   # ============================================================
-  # 3️⃣ Gene universes
+  # step 3: Gene universes
   # ============================================================
   all_genes <- rownames(seurat_sub)
   seurat_sub <- FindVariableFeatures(seurat_sub, selection.method = "vst",
@@ -283,7 +260,7 @@ run_clonewise_DEG_suite <- function(
       mean_raw[hvgs] >= min_mean_raw
   ]
   # ============================================================
-  # 4️⃣ DEG results loop (3 gene sets × 2 methods)
+  # step 4: DEG results loop (3 gene sets × 2 methods)
   # ============================================================
   combos <- tribble(
     ~setting, ~features, ~label,
@@ -299,7 +276,7 @@ run_clonewise_DEG_suite <- function(
     feats   <- combos$features[[i]]
     label   <- combos$label[i]
     for (m in methods) {
-      message(glue("🔹 Running {m} on {setting} ({length(feats)} genes)"))
+      message(glue("Running {m} on {setting} ({length(feats)} genes)"))
       res <- do_one_deg(seurat_sub, feats, m)
       res2 <- adjust_and_append_avg(res, seurat_sub, feats)
       key <- glue("{setting}_{toupper(m)}")
@@ -322,7 +299,7 @@ run_clonewise_DEG_suite <- function(
   }
   summary_tab <- bind_rows(summary_rows)
   # ============================================================
-  # 5️⃣ Save Excel
+  # step 5: Save Excel
   # ============================================================
   wb <- createWorkbook()
   addWorksheet(wb, "Summary")
@@ -338,9 +315,9 @@ run_clonewise_DEG_suite <- function(
   }
   purrr::iwalk(deg_results, ~ write_one(.y, .x))
   saveWorkbook(wb, excel_path, overwrite = TRUE)
-  message(glue("💾 Excel saved: {excel_path}"))
+  message(glue("Excel saved: {excel_path}"))
   # ============================================================
-  # 6️⃣ Volcano plot (MAST × Top HVGs)
+  # step 6: Volcano plot (MAST × Top HVGs)
   # ============================================================
   mast_key <- "DEG2_TopHVGs_MAST"
   volc_plot <- NULL
@@ -424,7 +401,7 @@ run_clonewise_DEG_suite <- function(
     
     ggsave(volcano_path, volc_plot, width = 8.5, height = 7, dpi = 300)
     
-    message(glue("🌋 Volcano saved: {volcano_path}"))
+    message(glue("Volcano saved: {volcano_path}"))
   }
   return(invisible(list(
     summary = summary_tab,
@@ -470,18 +447,18 @@ run_low_high_OA_analysis_for_a_single_sample <- function(
     library(scales)
   })
   message("\n==============================")
-  message(glue("🔷 Starting OA Analysis: {sample_label}"))
+  message(glue("Starting OA Analysis: {sample_label}"))
   message("==============================\n")
   # -----------------------------------------
   # 0. Create output folder
   # -----------------------------------------
   sample_dir <- file.path(output_dir, sample_label)
   dir.create(sample_dir, recursive = TRUE, showWarnings = FALSE)
-  message(glue("📁 Output folder created: {sample_dir}\n"))
+  message(glue("Output folder created: {sample_dir}\n"))
   # -----------------------------------------
   # 1. DimPlot
   # -----------------------------------------
-  message("🔹 Step 1: Creating DimPlot …")
+  message("Step 1: Creating DimPlot …")
   p_dim <- DimPlot(
     seurat_obj,
     reduction = reduction,
@@ -505,7 +482,7 @@ run_low_high_OA_analysis_for_a_single_sample <- function(
   # -----------------------------------------
   # 2. Compute OA per clone
   # -----------------------------------------
-  message("🔹 Step 2: Computing Output Activity (OA)…")
+  message("Step 2: Computing Output Activity (OA)…")
   meta <- seurat_obj@meta.data %>%
     tibble::rownames_to_column("cell_ID") %>%
     dplyr::rename(CloneID = !!clone_col)
@@ -560,7 +537,7 @@ run_low_high_OA_analysis_for_a_single_sample <- function(
   # -----------------------------------------
   # 3. OA UMAP plot
   # -----------------------------------------
-  message("🔹 Step 3: Creating OA UMAP …")
+  message("Step 3: Creating OA UMAP …")
   emb <- Embeddings(seurat_obj, reduction)
   
   umap_df <- emb[, 1:2] %>%
@@ -603,7 +580,7 @@ run_low_high_OA_analysis_for_a_single_sample <- function(
   # -----------------------------------------
   # 4. DEG (subset for HSC / MPP)
   # -----------------------------------------
-  message("🔹 Step 4: Running clonewise DEG (HSC-only)…")
+  message("Step 4: Running clonewise DEG (HSC-only)…")
   # Subset object for DEG cell types
   seurat_deg <- subset(seurat_obj, subset = celltype %in% deg_celltypes)
   # Run DEG module
@@ -700,14 +677,14 @@ run_low_high_OA_analysis_for_a_single_sample <- function(
   # -----------------------------------------
   # 5. Venn diagram (Universe-filtered only)
   # -----------------------------------------
-  message("🔹 Step 5: Creating universe-filtered Venn diagram …")
+  message("Step 5: Creating universe-filtered Venn diagram …")
   mast_top <- deg_out$results$DEG2_TopHVGs_MAST
   # Significant DEGs
   sig_low_DEGs <- mast_top %>%
     filter(avg_log2FC > fc_cutoff, p_val_adj < fdr_cutoff) %>%
     pull(gene)
   # ======================================================
-  # 📌 Background universe
+  # Background universe
   # ======================================================
   mast_genes <- mast_top$gene
   ref_genes  <- full_ref_deg_genes_list
@@ -776,7 +753,7 @@ run_low_high_OA_analysis_for_a_single_sample <- function(
   # -----------------------------------------
   # 6. Contour UMAP
   # -----------------------------------------
-  message("🔹 Step 6: Creating contour UMAP …")
+  message("Step 6: Creating contour UMAP …")
   meta_df <- seurat_obj@meta.data %>%
     dplyr::select(celltype) %>%
     cbind(
@@ -832,27 +809,7 @@ run_low_high_OA_analysis_for_a_single_sample <- function(
 ## Prepare Vitro input ##
 
 ############################
-
-# Prepare seurat_vitro_exp1_Y
-
-young_samples <- c("1_Y2", "2_Y3", "3_Y4")
-seurat_vitro_exp1_Y <- subset(seurat_vitro_exp1,subset = sampleName %in% young_samples)
-seurat_vitro_exp1_Y$CloneID <- seurat_vitro_exp1_Y$uniqueClonesTraced
-table(seurat_vitro_exp1_Y$celltype)
-# Ready: seurat_vitro_exp1_Y
-
-# Prepare seurat_vitro_exp1_O
-
-seurat_vitro_exp1
-table(seurat_vitro_exp1$sampleName)
-old_samples <- c('4_O2','5_O3','6_O4')
-seurat_vitro_exp1_O <- subset(seurat_vitro_exp1,subset = sampleName %in% old_samples)
-seurat_vitro_exp1_O # 15420 cells 
-table(seurat_vitro_exp1_O$celltype)
-table(Idents(seurat_vitro_exp1_O))
-seurat_vitro_exp1_O$CloneID <- seurat_vitro_exp1_O$uniqueClonesTraced
-# Ready: seurat_vitro_exp1_O
-
+                      
 #######
 
 # Prepare seurat_vitro_exp2_Y
@@ -901,23 +858,6 @@ table(Idents(seurat_in_vitro_day0_O)) # O_vitro
 
 ##############################
 
-# Prepare seurat_vivo_exp1_Y
-table(seurat_vivo_exp1$sampleName)
-young_vivo_exp1_sample <- "1_YOUNG"
-seurat_vivo_exp1_Y <- subset(seurat_vivo_exp1,subset = sampleName %in% young_vivo_exp1_sample)
-seurat_vivo_exp1_Y # 3547 cells
-table(seurat_vivo_exp1_Y$celltype)
-# Ready: seurat_vivo_exp1_Y
-
-########
-
-# Prepare seurat_vivo_exp1_O
-old_vivo_exp1_sample <- '2_Old'
-seurat_vivo_exp1_O <- subset(seurat_vivo_exp1,subset = sampleName %in% old_vivo_exp1_sample)
-seurat_vivo_exp1_O # 3703 cells 
-table(seurat_vivo_exp1_O$celltype)
-# Ready: seurat_vivo_exp1_O
-
 #########
 
 # Prepare seurat_vivo_exp2_Y
@@ -958,33 +898,15 @@ table(Idents(seurat_in_vivo_day60_O))
 
 ###########################################
 
-### Run EXP1 and EXP2 OA pipeline ###
+### Run EXP2 OA pipeline ###
 
-setwd('/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Figure1/OA_pipeline_out')
-
-# Run both Exp1 and Exp2 
-sample_list <- list(
-  Exp1_vitro_Y = seurat_vitro_exp1_Y,
-  Exp1_vitro_O = seurat_vitro_exp1_O,
-  Exp2_vitro_Y = seurat_vitro_exp2_Y,
-  Exp2_vitro_O = seurat_vitro_exp2_O,
-  
-  Exp1_vivo_Y  = seurat_vivo_exp1_Y,
-  Exp1_vivo_O  = seurat_vivo_exp1_O,
-  Exp2_vivo_Y  = seurat_vivo_exp2_Y,
-  Exp2_vivo_O  = seurat_vivo_exp2_O
-)
-
-# Run Exp2 only
+# Run Exp2 
 sample_list <- list(
   Exp2_vitro_Y = seurat_vitro_exp2_Y,
   Exp2_vitro_O = seurat_vitro_exp2_O,
   Exp2_vivo_Y  = seurat_vivo_exp2_Y,
   Exp2_vivo_O  = seurat_vivo_exp2_O
 )
-
-# Run Exp2 Y vivo only 
-sample_list <- list(Exp2_vivo_Y = seurat_vivo_exp2_Y)
 
 # Define global parameters
 
