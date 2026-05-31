@@ -11,8 +11,6 @@
 
 ##########################
 
-setwd('/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts')
-
 ## Load packages ##
 
 load_all_packages <- function() {
@@ -31,14 +29,14 @@ load_all_packages <- function() {
 load_all_packages()
 
 # set working directory
-setwd('/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/test_folder')
+setwd('...')
 
 ################################
 
 # read in CrossAge data (in vitro and in vivo)
-seurat_in_vivo <- readRDS("/project2/sli68423_1316/projects/U01_aim2/Cross_Expirement/PreProcessing/Harmony_integration_Cutoff_1K/cross.exp.combined.vivo.hto.celltag.annotation_by_lamis_object.correct_by_HO_09_02_2025.rds")
 
-seurat_in_vitro <- readRDS("/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/test_folder/Data_objects/crossage_vitro.3_2.rds")
+seurat_in_vivo <- readRDS("data/CrossAge(exp2)_vivo.RDS")
+seurat_in_vitro <- readRDS("data/CrossAge(exp2)_vitro.RDS")
 
 # ------------------------------------------------------------
 #  Define cell type groups (HSC/MPP and myeloid)
@@ -362,7 +360,7 @@ combined_plot_OO_OY
 
 # save figure 2f
 ggsave(
-  filename = "/project2/sli68423_1316/users/chris/Celltag/HSC_heterogenecity/Publication_plots/Figure2_Clone_size_distribution/Main/OO_OY_HSC_MPP_output_ranked_plot.pdf",
+  filename = "OO_OY_HSC_MPP_output_ranked_plot.pdf",
   plot = combined_plot_OO_OY,
   width = 10,
   height = 6,
