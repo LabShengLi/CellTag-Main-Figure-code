@@ -183,7 +183,7 @@ run_survival <- function(clinical, score, title, split_by = NULL) {
 # MULTI-SIGNATURE (Top10/20/30)
 # ==========================
 
-top_tbl <- read_csv("/project2/sli68423_1316/users/Kailiang/Test_Rcode/ML results/RF/self_renewal/vivo/DVG_union_OO_Top50_Importance.csv") %>%
+top_tbl <- read_csv("data/DVG_union_OO_Top50_Importance.csv") %>%
   arrange(desc(Overall))
 length(top_tbl$Gene)
 
@@ -265,7 +265,7 @@ res_gene$cox
 ## ==========================
 ## 7. UP / DOWN SIGNATURE
 ## ==========================
-out_dir <- "/project2/sli68423_1316/users/Kailiang/Test_Rcode/3.7/RF/self_renewal/vivo/"
+out_dir <- "output/"
 
 genes_up <- read.csv(
   file.path(out_dir, "LowOutput_OO_Top10_Up_in_High.csv")
