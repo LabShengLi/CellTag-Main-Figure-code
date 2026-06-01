@@ -3,27 +3,16 @@ rm(list = ls())
 library(Matrix)
 library(ggplot2)
 
-wdir <- "/project2/sli68423_1316/projects/U01_aim2/results/2026_01_24_celltag_qc"
-input_dir <- file.path(wdir, "exp2_celltag_input")
-
-dir.create(wdir, showWarnings = FALSE, recursive = TRUE)
-setwd(wdir)
+wdir <- "celltag_qc_plot"
+dir.create(wdir, recursive = TRUE, showWarnings = FALSE)
 
 exp_name <- "figs3_d_exp2_vivo_old"
-
-# Set these three names to match your current filename
 dsname_list <- c("Old1B", "Old2B", "Old3B")
-
-# Automatically read RDS files from the input directory
-jaccard_fn_list <- sort(list.files(
-    input_dir,
-    pattern = "^O[123]B.*\\.RDS$",
-    full.names = TRUE
-))
-
-if (length(jaccard_fn_list) != 3) {
-    stop("Expected 3 RDS files, but found: ", length(jaccard_fn_list))
-}
+jaccard_fn_list <- c(
+    "O1B_mef_Jaccard_mtx.RDS",
+    "O2B_mef_Jaccard_mtx.RDS",
+    "O3B_mef_Jaccard_mtx.RDS"
+)
 
 read_jaccard_vec <- function(fn) {
     jcm <- readRDS(fn)
@@ -59,6 +48,8 @@ p <- ggplot(df, aes(x = idx, y = value)) +
     )
 
 # print(p)
+
+setwd(wdir)
 
 # PNG
 dpi <- 300

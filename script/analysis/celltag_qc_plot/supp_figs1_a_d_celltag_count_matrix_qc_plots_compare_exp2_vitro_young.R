@@ -3,21 +3,20 @@
     library(dplyr)
     library(ggplot2)
 
-    # Figure S1 a, d, exp2 vitro young qc plots
-    dsname <- "exp2_vitro_young"
-    wdir <- "/project2/sli68423_1316/projects/U01_aim2/results/2026_01_24_celltag_qc"
+# Figure S1 a, d, exp2 vitro young qc plots
+dsname <- "exp2_vitro_young"
+wdir <- "celltag_qc_plot"
 
-    cell_tag_matrix_fn_list <- c(
-        "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData/CellTagCounts/run_count_1_Ya/1_Ya_hf1.d15.v1.celltag.matrix.Rds",
-        "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData/CellTagCounts/run_count_2_Ya/2_Ya_hf1.d15.v1.celltag.matrix.Rds",
-        "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData/CellTagCounts/run_count_3_Ya/3_Ya_hf1.d15.v1.celltag.matrix.Rds"
-    )
+cell_tag_matrix_fn_list <- c(
+    "1_Ya_hf1.d15.v1.celltag.matrix.Rds",
+    "2_Ya_hf1.d15.v1.celltag.matrix.Rds",
+    "3_Ya_hf1.d15.v1.celltag.matrix.Rds"
+)
 
-    dsname_list <- c("Young1", "Young2", "Young3")   # <-- fix
-    umi_cutoff <- 2
+dsname_list <- c("Young1", "Young2", "Young3")
+umi_cutoff <- 2
 
-    dir.create(wdir, recursive = TRUE, showWarnings = FALSE)
-    setwd(wdir)
+dir.create(wdir, recursive = TRUE, showWarnings = FALSE)
 
     # -------------------------
     # Helper: load + sanitize
@@ -53,6 +52,7 @@
         theme(panel.border = element_rect(fill = NA, linewidth = 0.8))
 
     bp1_3
+    setwd(wdir)
     ggsave(sprintf("figs1_a_right_panel_%s_CellTag_per_cell_boxplot_3datasets.pdf", dsname),
            plot = bp1_3, width = 3, height = 3)
 

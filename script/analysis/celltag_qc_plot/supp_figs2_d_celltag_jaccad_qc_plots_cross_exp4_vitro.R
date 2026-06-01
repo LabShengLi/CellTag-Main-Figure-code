@@ -17,36 +17,20 @@ library(Matrix)
 library(ggplot2)
 
 # ============================================================
-# 1) Output working directory (UNCHANGED)
+# 1) Output working directory
 #    All figures will be saved here
 # ============================================================
-wdir <- "/project2/sli68423_1316/projects/U01_aim2/results/2026_01_24_celltag_qc"
-setwd(wdir)
+wdir <- "celltag_qc_plot"
+dir.create(wdir, recursive = TRUE, showWarnings = FALSE)
 
 # ============================================================
-# 2) Input directory (NEW)
-#    Location of Jaccard matrix files
-# ============================================================
-input_dir <- "/project2/sli68423_1316/projects/U01_aim2/Cross_Expirement/ExtractBarcodes/Out"
-
-# ============================================================
-# 3) Experiment name
+# 2) Input files (mapped filenames from copy_celltag_qc_inputs.sh)
 # ============================================================
 exp_name <- "figs2_d_crossexp4_vitro"
-
-# ============================================================
-# 4) Dataset names
-# ============================================================
 dsname_list <- c("O_vitro", "Y_vitro")
-
-# ============================================================
-# 5) Construct input file paths
-#    Each dataset has its own subdirectory under input_dir
-# ============================================================
-jaccard_fn_list <- file.path(
-    input_dir,
-    dsname_list,
-    "mef_Jaccard_mtx.RDS"
+jaccard_fn_list <- c(
+    "O_vitro_mef_Jaccard_mtx.RDS",
+    "Y_vitro_mef_Jaccard_mtx.RDS"
 )
 
 # ============================================================
@@ -95,6 +79,8 @@ p <- ggplot(df, aes(x = idx, y = value)) +
 # ============================================================
 # 10) Save outputs
 # ============================================================
+setwd(wdir)
+
 # PNG
 outfn_png <- sprintf("%s_Jaccard_2datasets_onepanel.png", exp_name)
 ggsave(outfn_png, plot = p, width = 2.5, height = 2.5, dpi = 300)

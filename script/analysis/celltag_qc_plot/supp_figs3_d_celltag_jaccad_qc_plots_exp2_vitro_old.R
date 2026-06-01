@@ -3,15 +3,15 @@ rm(list = ls())
 library(Matrix)
 library(ggplot2)
 
-wdir <- "/project2/sli68423_1316/projects/U01_aim2/results/2026_01_24_celltag_qc"
-setwd(wdir)
+wdir <- "celltag_qc_plot"
+dir.create(wdir, recursive = TRUE, showWarnings = FALSE)
 
 exp_name <- "figs3_d_exp2_vitro_old"
 dsname_list <- c("Old1", "Old2", "Old3")
 jaccard_fn_list <- c(
-    "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData/4_Oa/celltag/mef_Jaccard_mtx.RDS",
-    "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData/5_Oa/celltag/mef_Jaccard_mtx.RDS",
-    "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData/6_Oa/celltag/mef_Jaccard_mtx.RDS"
+    "4_Oa_mef_Jaccard_mtx.RDS",
+    "5_Oa_mef_Jaccard_mtx.RDS",
+    "6_Oa_mef_Jaccard_mtx.RDS"
 )
 
 read_jaccard_vec <- function(fn) {
@@ -51,6 +51,8 @@ p <- ggplot(df, aes(x = idx, y = value)) +
     )
 
 # p
+
+setwd(wdir)
 
 # PDF (3 inch)
 outfn <- sprintf("%s_Jaccard_3datasets_onepanel.pdf", exp_name)

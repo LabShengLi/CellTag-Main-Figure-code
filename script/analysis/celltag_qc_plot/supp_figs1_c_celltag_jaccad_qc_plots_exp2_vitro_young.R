@@ -3,17 +3,15 @@ rm(list = ls())
 library(Matrix)
 library(ggplot2)
 
-wdir <- "/project2/sli68423_1316/projects/U01_aim2/results/2026_01_24_celltag_qc"
-
-dir.create(wdir)
-setwd(wdir)
+wdir <- "celltag_qc_plot"
+dir.create(wdir, recursive = TRUE, showWarnings = FALSE)
 
 exp_name <- "figs1_c_exp2_vitro_young"
 dsname_list <- c("Young1", "Young2", "Young3")
 jaccard_fn_list <- c(
-    "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData/1_Ya/celltag/mef_Jaccard_mtx.RDS",
-    "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData/2_Ya/celltag/mef_Jaccard_mtx.RDS",
-    "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData/3_Ya/celltag/mef_Jaccard_mtx.RDS"
+    "1_Ya_mef_Jaccard_mtx.RDS",
+    "2_Ya_mef_Jaccard_mtx.RDS",
+    "3_Ya_mef_Jaccard_mtx.RDS"
 )
 
 read_jaccard_vec <- function(fn) {
@@ -54,6 +52,8 @@ p <- ggplot(df, aes(x = idx, y = value)) +
     )
 
 # print(p)
+
+setwd(wdir)
 
 # PNG (3 inch @300 dpi)
 # dpi <- 300

@@ -4,19 +4,18 @@ library(dplyr)
 library(ggplot2)
 
 dsname <- "figs3_a_left_exp2_vitro_old"
-wdir <- "/project2/sli68423_1316/projects/U01_aim2/results/2026_01_24_celltag_qc"
+wdir <- "celltag_qc_plot"
 
 cell_tag_matrix_fn_list <- c(
-    "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData/CellTagCounts/run_count_4_Oa/4_Oa_hf1.d15.v1.celltag.matrix.Rds",
-    "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData/CellTagCounts/run_count_5_Oa/5_Oa_hf1.d15.v1.celltag.matrix.Rds",
-    "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData/CellTagCounts/run_count_6_Oa/6_Oa_hf1.d15.v1.celltag.matrix.Rds"
+    "4_Oa_hf1.d15.v1.celltag.matrix.Rds",
+    "5_Oa_hf1.d15.v1.celltag.matrix.Rds",
+    "6_Oa_hf1.d15.v1.celltag.matrix.Rds"
 )
 
-dsname_list <- c("Old1", "Old2", "Old3")   # <-- fix
+dsname_list <- c("Old1", "Old2", "Old3")
 umi_cutoff <- 2
 
 dir.create(wdir, recursive = TRUE, showWarnings = FALSE)
-setwd(wdir)
 
 # -------------------------
 # Helper: load + sanitize
@@ -52,6 +51,7 @@ bp1_3 <- ggplot(df_n_tags_f, aes(x = dataset, y = n_tags)) +
     theme(panel.border = element_rect(fill = NA, linewidth = 0.8))
 
 bp1_3
+setwd(wdir)
 ggsave(sprintf("%s_CellTag_per_cell_boxplot_3datasets.pdf", dsname),
        plot = bp1_3, width = 3, height = 3)
 

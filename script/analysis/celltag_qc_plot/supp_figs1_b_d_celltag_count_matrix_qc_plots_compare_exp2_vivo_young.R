@@ -5,19 +5,18 @@ library(ggplot2)
 
 # Figure S1 b, d, exp2 vivo young qc plots
 dsname <- "exp2_vivo_young"
-wdir <- "/project2/sli68423_1316/projects/U01_aim2/results/2026_01_24_celltag_qc"
+wdir <- "celltag_qc_plot"
 
 cell_tag_matrix_fn_list <- c(
-    "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData_Vivo/CellTagCounts/run_count_Y1B/Y1B_hf1.d15.v1.celltag.matrix.Rds",
-    "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData_Vivo/CellTagCounts/run_count_Y2B/Y2B_hf1.d15.v1.celltag.matrix.Rds",
-    "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/celltag_aim2/Analysis_ClonalData_Vivo/CellTagCounts/run_count_Y3B/Y3B_hf1.d15.v1.celltag.matrix.Rds"
+    "Y1B_hf1.d15.v1.celltag.matrix.Rds",
+    "Y2B_hf1.d15.v1.celltag.matrix.Rds",
+    "Y3B_hf1.d15.v1.celltag.matrix.Rds"
 )
 
-dsname_list <- c("Young1B", "Young2B", "Young3B")   # <-- fix
+dsname_list <- c("Young1B", "Young2B", "Young3B")
 umi_cutoff <- 2
 
 dir.create(wdir, recursive = TRUE, showWarnings = FALSE)
-setwd(wdir)
 
 # -------------------------
 # Helper: load + sanitize
@@ -53,6 +52,7 @@ bp1_3 <- ggplot(df_n_tags_f, aes(x = dataset, y = n_tags)) +
     theme(panel.border = element_rect(fill = NA, linewidth = 0.8))
 
 bp1_3
+setwd(wdir)
 ggsave(sprintf("figs1_b_right_panel_%s_CellTag_per_cell_boxplot_3datasets.pdf", dsname),
        plot = bp1_3, width = 3, height = 3)
 
