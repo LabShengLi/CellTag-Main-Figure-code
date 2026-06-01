@@ -6,9 +6,7 @@
 #SBATCH --cpus-per-task=16         # <— bump this to what your node can give
 #SBATCH --mem=60G                 # <— and give it plenty of RAM
 #SBATCH --time=2-00:00:00
-#SBATCH --output=/project2/sli68423_1316/users/yang/log/%x.%j.log
-#SBATCH --mail-user=yliu8962@usc.edu
-#SBATCH --mail-type=END
+#SBATCH --output=log/%x.%j.log
 
 # # cellranger preprocessing of raw single cell with hashtag data
 
@@ -19,10 +17,10 @@ module load cellranger/9.0.1
 
 # --------------------- user inputs ---------------------
 ID=${1:? "Usage: sbatch this.sh <RunID>"}             # e.g., CrossExp_YO_YY
-CSV=/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/preprocessing/cellranger/Cell_Ranger_Multi/multi_config_${ID}_ly.csv
-REF=/project2/sli68423_1316/users/yang/reference/10x/refdata-gex-mm10-2020-A
-#OUTBASE=/project2/sli68423_1316/projects/U01_aim2/Cross_Expirement/CrossExpCellRangerMuli/Out
-OUTBASE=/project2/sli68423_1316/projects/U01_aim2/results/2026_02_26_cellranger_multi
+CSV=multi_config_${ID}_ly.csv
+REF=reference/10x/refdata-gex-mm10-2020-A
+#OUTBASE=projects/U01_aim2/Cross_Expirement/CrossExpCellRangerMuli/Out
+OUTBASE=projects/U01_aim2/results/2026_02_26_cellranger_multi
 # ------------------------------------------------------
 
 CPUS=${SLURM_CPUS_PER_TASK:-16}

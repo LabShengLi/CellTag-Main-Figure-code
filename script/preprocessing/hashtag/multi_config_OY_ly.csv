@@ -1,14 +1,14 @@
 [gene-expression]
-reference,/project2/sli68423_1316/users/yang/reference/10x/refdata-gex-mm10-2020-A
+reference,reference/10x/refdata-gex-mm10-2020-A
 create-bam,true
 
 [feature]
-reference,/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/Preprocessing_Scripts/Cell_Ranger/Cell_Ranger_Multi/u01_feature_ref.csv
+reference,u01_feature_ref.csv
 
 [libraries]
 fastq_id,fastqs,feature_types
-OY_Vivo_GEX,/project2/sli68423_1316/users/yang/raw_data/U01_aim2/cross_exp/cross_exp_gex/,Gene Expression
-OY_Vivo_CSP,/project2/sli68423_1316/users/yang/raw_data/U01_aim2/cross_exp/L2_GEX_CSP/DeGregori_11192024_2_CSP/,Antibody Capture
+OY_Vivo_GEX,raw_data/U01_aim2/cross_exp/cross_exp_gex/,Gene Expression
+OY_Vivo_CSP,raw_data/U01_aim2/cross_exp/L2_GEX_CSP/DeGregori_11192024_2_CSP/,Antibody Capture
 
 [samples]
 sample_id,hashtag_ids

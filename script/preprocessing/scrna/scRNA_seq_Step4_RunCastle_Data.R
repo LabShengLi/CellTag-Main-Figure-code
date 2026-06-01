@@ -19,12 +19,12 @@ opaque <- function(color, opacity, max = 255) {
 }
 
 
-wdir <- '/project2/sli68423_1316/projects/U01_aim2/Cross_Expirement/PreProcessing'
+wdir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing'
 
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/funForLoading_PK.R")
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/data_preparation.R")
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/castle.R")
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/Useful_Functions.R")
+source("scripts/common/funForLoading_PK.R")
+source("scripts/common/data_preparation.R")
+source("scripts/common/castle.R")
+source("scripts/common/Useful_Functions.R")
 
 SampleList <- c("O_vitro", "OO", "OY", "Y_vitro", "YY", "YO")
 Sample <- "O_vitro"

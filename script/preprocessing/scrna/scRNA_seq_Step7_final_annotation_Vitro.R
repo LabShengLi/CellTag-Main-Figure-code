@@ -7,8 +7,8 @@ library(ggplot2)
 library(dplyr)      # also exports %>%
 
 
-wdir <- '/project2/sli68423_1316/projects/U01_aim2/Cross_Expirement/PreProcessing/Harmony_integration_Cutoff_1K/'
-DataDir <- '/project2/sli68423_1316/projects/U01_aim2/Cross_Expirement/PreProcessing/Harmony_integration_Cutoff_1K/'
+wdir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing/Harmony_integration_Cutoff_1K/'
+DataDir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing/Harmony_integration_Cutoff_1K/'
 
 infn <- "cross.exp.combined.vitro.hto.celltag.rds"
 
@@ -34,7 +34,7 @@ dev.off()
 ####################
 ####################
 # read marker file
-marker_fn <- '/project2/sli68423_1316/users/yang/workspace/nanome/related_project/single_cell/chip_mouse_hsc_cell_types_v4.tsv'
+marker_fn <- 'chip_mouse_hsc_cell_types_v4.tsv'
 marker_df <- read.table(marker_fn, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 head(marker_df)
 dim(marker_df)
@@ -233,7 +233,7 @@ dev.off()
 ####################
 ####################
 # read marker file
-marker_fn <- '/project2/sli68423_1316/users/yang/workspace/nanome/related_project/single_cell/chip_mouse_hsc_cell_types_v4.tsv'
+marker_fn <- 'chip_mouse_hsc_cell_types_v4.tsv'
 marker_df <- read.table(marker_fn, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 head(marker_df)
 dim(marker_df)

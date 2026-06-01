@@ -2,13 +2,13 @@
 ###########
 ## load castle trained data, integrate to Seurat object for Vivo and Vitro
 
-wdir <- '/project2/sli68423_1316/projects/U01_aim2/Cross_Expirement/PreProcessing'
+wdir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing'
 
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/funForLoading_PK.R")
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/data_preparation.R")
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/castle.R")
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/Useful_Functions.R")
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/funForSeurat.R")
+source("scripts/common/funForLoading_PK.R")
+source("scripts/common/data_preparation.R")
+source("scripts/common/castle.R")
+source("scripts/common/Useful_Functions.R")
+source("scripts/common/funForSeurat.R")
 
 min.genes = 200
 min.cells = 3
@@ -99,10 +99,10 @@ library("Seurat")
 hspc.listFile <- hspc.listFile[-c(1, 4)]
 hspc.listFile
 
-# [1] "/project2/sli68423_1316/projects/U01_aim2/Cross_Expirement/PreProcessing/OO/castle/OO_seuratTrainedCt.rds"
-# [2] "/project2/sli68423_1316/projects/U01_aim2/Cross_Expirement/PreProcessing/OY/castle/OY_seuratTrainedCt.rds"
-# [3] "/project2/sli68423_1316/projects/U01_aim2/Cross_Expirement/PreProcessing/YO/castle/YO_seuratTrainedCt.rds"
-# [4] "/project2/sli68423_1316/projects/U01_aim2/Cross_Expirement/PreProcessing/YY/castle/YY_seuratTrainedCt.rds"
+# [1] "projects/U01_aim2/Cross_Expirement/PreProcessing/OO/castle/OO_seuratTrainedCt.rds"
+# [2] "projects/U01_aim2/Cross_Expirement/PreProcessing/OY/castle/OY_seuratTrainedCt.rds"
+# [3] "projects/U01_aim2/Cross_Expirement/PreProcessing/YO/castle/YO_seuratTrainedCt.rds"
+# [4] "projects/U01_aim2/Cross_Expirement/PreProcessing/YY/castle/YY_seuratTrainedCt.rds"
 
 for (i in 1:length(x = hspc.listFile)) {
 	#i=1

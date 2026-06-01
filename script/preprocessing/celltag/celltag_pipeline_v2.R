@@ -21,7 +21,7 @@ p <- add_argument(p, "--barcode_agg_fn", help = "Aggregated barcode output file 
 p <- add_argument(p, "--celltag_version", help = "celltag version", default = "v1")
 # A 90% percentile cut-off in terms of reads reported for each CellTag was used to select CellTags for inclusion on the whitelist of cell barcodes. ref: https://www-nature-com.libproxy2.usc.edu/articles/s41586-018-0744-4#Sec7
 p <- add_argument(p, "--cutoff_Whitelist_fn", help = "Whitelist cutoff used in filename", type = "str", default =
-    "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/References/From_Marco_Aug2022/CelltagV1_plasmid_sequencing_Marco/220801_A00405_0608_BHT22FDSX3/v1_whitelist_Cutoff_0.9.csv")
+    "whitelist/v1_whitelist_Cutoff_0.9.csv")
 # The suggested cutoff that marks presence or absence is at least 2 counts per CellTag per Cell. For details regarding cutoff choice, please refer to the paper - https://www.nature.com/articles/s41586-018-0744-4. ref: https://github.com/morris-lab/CellTagR?tab=readme-ov-file#2-binarize-the-single-cell-celltag-umi-count-matrix
 p <- add_argument(p, "--binarize_k", help = "k used in SingleCellDataBinarization()", type = "integer", default = 2)
 # Cells expressing more than 20 CellTags (likely to correspond to cell multiplets), and less than 2 CellTags per cell were filtered out.  ref: https://www-nature-com.libproxy2.usc.edu/articles/s41586-018-0744-4#Sec7
@@ -63,7 +63,7 @@ stop_at_count_matrix <- argv$stop_at_count_matrix
 
 if (is_debug) {
     dsname = "exp2_y1a_y1b"
-    wdir <- "/project2/sli68423_1316/projects/U01_aim2/results/2026_01_27_celltag_collapsing_test"
+    wdir <- "projects/U01_aim2/results/2026_01_27_celltag_collapsing_test"
     bam_dir <- "bam_in"
     barcode_fns <- "barcode/barcode_1.tsv.gz,barcode/barcode_2.tsv.gz"
     skip_raw_read <- T

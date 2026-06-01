@@ -3,9 +3,9 @@ rm(list = ls())
 
 library(EnhancedVolcano)
 
-lnWD <- '/project2/sli68423_1316/projects/U01_aim2/Cross_Expirement/PreProcessing/'
+lnWD <- 'projects/U01_aim2/Cross_Expirement/PreProcessing/'
 
-DataDir <- '/project2/sli68423_1316/projects/U01_aim2/Cross_Expirement/PreProcessing/Harmony_integration_Cutoff_1K/'
+DataDir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing/Harmony_integration_Cutoff_1K/'
 
 RDSname <- "cross.exp.combined.vitro.hto.celltag.rds"
 
@@ -13,12 +13,12 @@ outdir <- paste0(lnWD, "biology"); dir.create(outdir, showWarnings = FALSE)
 
 library(ggplot2)
 
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/funForLoading_PK.R")
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/data_preparation.R")
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/castle.R")
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/Useful_Functions.R")
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/funForSeurat.R")
-source("/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/plot_figures.R")
+source("scripts/common/funForLoading_PK.R")
+source("scripts/common/data_preparation.R")
+source("scripts/common/castle.R")
+source("scripts/common/Useful_Functions.R")
+source("scripts/common/funForSeurat.R")
+source("scripts/common/plot_figures.R")
 
 ############ load Seurat object
 hspc.combined <- readRDS(paste0(DataDir, "/", RDSname))
@@ -113,13 +113,13 @@ dev.off()
 ############### cell type identification ##########
 
 ### this long list from Parveen
-markers <- read.table(file = "/project2/sli68423_1316/from_jax/Lamis/U01_Projects/U01/PK/DataTransition/markers_orderbyCT.txt", sep = "\t", header = F)
+markers <- read.table(file = "from_jax/Lamis/U01_Projects/U01/PK/DataTransition/markers_orderbyCT.txt", sep = "\t", header = F)
 markers <- markers$V1
 
 ### this long list from chenx
-markers <- read.table(file = "/project2/sli68423_1316/users/yang/workspace/U01_aim2/scripts/yang/common/markers_orderbyCT_8S.txt", sep = "\t", header = F)[, 2]
+markers <- read.table(file = "scripts/common/markers_orderbyCT_8S.txt", sep = "\t", header = F)[, 2]
 
-marker_fn <- '/project2/sli68423_1316/users/yang/workspace/nanome/related_project/single_cell/chip_mouse_hsc_cell_types_v4.tsv'
+marker_fn <- 'chip_mouse_hsc_cell_types_v4.tsv'
 markers <- unique(read.table(file = marker_fn, sep = "\t", header = F)[, 3])
 markers
 
