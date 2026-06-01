@@ -21,11 +21,10 @@ suppressPackageStartupMessages({
 # Heatmap values are signed -log10Q (same scale as 2026_05_28 plots).
 # -------------------------------------------------------------------------
 
-wdir <- "/project2/sli68423_1316/projects/U01_aim2/results/2026_05_17_scpa"
+wdir <- "figure4"
 dir.create(wdir, recursive = TRUE, showWarnings = FALSE)
-setwd(wdir)
 
-infn2 <- "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vivo.RDS"
+infn2 <- "CrossAge_vivo.RDS"
 
 # -------------------------------------------------------------------------
 # Pathway definitions and SCPA helper
@@ -74,6 +73,7 @@ load_or_run_scpa <- function(obj, label, group1_population) {
 # Run / load SCPA comparisons
 # -------------------------------------------------------------------------
 ss <- readRDS(infn2)
+setwd(wdir)
 ss <- subset(ss, subset = CloneID != 0)
 
 OY_vs_OO_path <- load_or_run_scpa(ss, label = "OY_vs_OO", group1_population = c("OY", "OO"))
@@ -153,19 +153,19 @@ pathways_mat <- pathways_mat_all[
 
 pathways_mat_selected <- pathways_mat_all[selected_pathways, , drop = FALSE]
 
-saveRDS(pathways_mat, file = "2026_05_29_pathways_OY_OO_and_YO_YY_mat.rds")
-saveRDS(pathways_mat_selected, file = "2026_05_29_pathways_OY_OO_and_YO_YY_selected_mat.rds")
+saveRDS(pathways_mat, file = file.path(wdir, "2026_05_29_pathways_OY_OO_and_YO_YY_mat.rds"))
+saveRDS(pathways_mat_selected, file = file.path(wdir, "2026_05_29_pathways_OY_OO_and_YO_YY_selected_mat.rds"))
 
 write.table(
     pathways_mat,
-    file = "2026_05_29_pathways_OY_OO_and_YO_YY_mat.tsv",
+    file = file.path(wdir, "2026_05_29_pathways_OY_OO_and_YO_YY_mat.tsv"),
     sep = "\t",
     quote = FALSE,
     col.names = NA
 )
 write.table(
     pathways_mat_selected,
-    file = "2026_05_29_pathways_OY_OO_and_YO_YY_selected_mat.tsv",
+    file = file.path(wdir, "2026_05_29_pathways_OY_OO_and_YO_YY_selected_mat.tsv"),
     sep = "\t",
     quote = FALSE,
     col.names = NA
@@ -200,7 +200,7 @@ make_pathway_heatmap <- function(mat, height_inch = 6) {
 hm <- make_pathway_heatmap(pathways_mat, height_inch = 6)
 draw(hm)
 
-pdf("2026_05_29_OY_OO_YO_YY_SCPA-pathways-enrichment.pdf", height = 9, width = 7.5)
+pdf(file.path(wdir, "2026_05_29_OY_OO_YO_YY_SCPA-pathways-enrichment.pdf"), height = 9, width = 7.5)
 draw(hm)
 invisible(dev.off())
 
@@ -252,7 +252,7 @@ draw_hm_selected <- function() {
 
 draw_hm_selected()
 
-pdf("2026_05_29_OY_OO_YO_YY_SCPA-pathways-enrichment_selected.pdf", height = 7.5, width = 7)
+pdf(file.path(wdir, "2026_05_29_OY_OO_YO_YY_SCPA-pathways-enrichment_selected.pdf"), height = 7.5, width = 7)
 draw_hm_selected()
 invisible(dev.off())
 
