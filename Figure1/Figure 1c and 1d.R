@@ -8,19 +8,19 @@ library(ggplot2)
 # Load data
 # =========================
 seurat.vivo.exp2 <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/Exp2_vivo_final.RDS"
+  "data/Exp2(exp1)_vivo.RDS"
 )
 
 seurat.vitro.exp2 <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/Exp2_vitro_final.RDS"
+  "data/Exp2(exp1)_vitro.RDS"
 )
 
 seurat.vivo.cross <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vivo.RDS"
+  "data/CrossAge(exp2)_vivo.RDS"
 )
 
 seurat.vitro.cross <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vitro.RDS"
+  "data/CrossAge(exp2)_vitro.RDS"
 )
 
 # =========================
