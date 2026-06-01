@@ -145,7 +145,7 @@ if (!skip_raw_read) {
     # may be large
     mat_dense <- as.matrix(mat)
 
-    out <- sprintf("%s/celltag.raw.count.tsv.gz", outdir)  # 建议直接压缩
+    out <- sprintf("%s/celltag.raw.count.tsv.gz", outdir)  # Recommended to gzip directly
     write.table(
         mat_dense,
         file = gzfile(out),
@@ -218,7 +218,7 @@ if (collapsing) {
     # may be large
     mat_dense <- as.matrix(mat)
 
-    out <- sprintf("%s/celltag.collapsed.count.tsv.gz", outdir)  # 建议直接压缩
+    out <- sprintf("%s/celltag.collapsed.count.tsv.gz", outdir)  # Recommended to gzip directly
     write.table(
         mat_dense,
         file = gzfile(out),

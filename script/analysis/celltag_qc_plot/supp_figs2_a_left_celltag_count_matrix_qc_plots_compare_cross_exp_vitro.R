@@ -131,8 +131,8 @@ hp1 <- ggplot(df2, aes(x = cell_ntags, fill = dataset)) +
     theme_classic() +
     theme(
         plot.margin = margin(5.5, 20, 5.5, 5.5),
-        legend.position = c(0.98, 0.98),   # 放到图内右上角
-        legend.justification = c(1, 1),    # 以右上角对齐
+        legend.position = c(0.98, 0.98),   # Place inside top-right corner
+        legend.justification = c(1, 1),    # Justify to the top-right
         legend.background = element_rect(fill = "white", color = NA)
     ) +
     labs(x = "CellTag number", y = "Cell number", fill = NULL)

@@ -11,10 +11,10 @@ setwd(wdir)
 
 exp_name <- "figs3_d_exp2_vivo_old"
 
-# 这三个名字按你当前文件名来写
+# Set these three names to match your current filename
 dsname_list <- c("Old1B", "Old2B", "Old3B")
 
-# 自动读取输入目录下的 RDS
+# Automatically read RDS files from the input directory
 jaccard_fn_list <- sort(list.files(
     input_dir,
     pattern = "^O[123]B.*\\.RDS$",

@@ -138,11 +138,11 @@ hp1 <- ggplot(df2, aes(x = cell_ntags)) +
     scale_x_continuous(breaks = 0:max(df2$cell_ntags)) +
     scale_y_continuous(
         labels = scales::comma,
-        expand = expansion(mult = c(0, 0.15))   # 顶部多留15%空间
+        expand = expansion(mult = c(0, 0.15))   # Leave 15% headroom at the top
     ) +
-    coord_cartesian(clip = "off") +           # 不裁剪
+    coord_cartesian(clip = "off") +           # Do not clip
     theme_classic() +
-    theme(plot.margin = margin(5.5, 20, 5.5, 5.5)) +  # 右侧/顶部外边距
+    theme(plot.margin = margin(5.5, 20, 5.5, 5.5)) +  # Right/top plot margin
     labs(x = "CellTag number", y = "Cell number")
 
 hp1
@@ -175,7 +175,7 @@ hp2 <- ggplot(df3, aes(x = cell_ntags, fill = dataset)) +
     theme_classic() +
     theme(
         plot.margin = margin(5.5, 20, 5.5, 5.5),
-        legend.position = c(0.98, 0.98),   # 放图内右上
+        legend.position = c(0.98, 0.98),   # Place inside top-right
         legend.justification = c(1, 1),
         legend.background = element_rect(fill = "white", color = NA)
     ) +
