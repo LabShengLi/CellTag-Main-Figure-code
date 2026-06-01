@@ -8,11 +8,11 @@ library(dplyr)
 library(tidyr)
 
 # ============================================================
-# 0. Load 数据
+# 0. Load data
 # ============================================================
 
 seurat.vivo.cross <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vivo.RDS"
+  "data/CrossAge(vivo)_vivo.RDS"
 )
 samples_to_plot <- c("OY", "OO")
 names(samples_to_plot) <- c("OY", "OO")
@@ -20,7 +20,7 @@ names(samples_to_plot) <- c("OY", "OO")
 filename <- "FateHeatmap_OY_vs_OO_log2sorted_grouped_split.pdf"
 
 # ============================================================
-# 1. 全局预处理
+# 1. Global preprocessing
 # ============================================================
 
 meta <- FetchData(seurat.vivo.cross,
@@ -36,7 +36,7 @@ meta <- meta %>%
 seurat.vivo.cross@meta.data <- meta
 
 # ============================================================
-# 2. Fate matrix 函数
+# 2. Fate matrices
 # ============================================================
 compute_fate_matrix <- function(seurat, cluster_col, larry_col, sample_col,
                                 samples_to_filt, min_cells,
@@ -85,7 +85,7 @@ get_fate_matrices <- function(seurat, samples_to_select, ...) {
   return(fate_mat_l)
 }
 
-# ---------------------- 2.1 fate heatmap 函数 (只在第一个 sample 显示标签) ----------------------
+# ---------------------- 2.1 fate heatmap function code ----------------------
 generate_fate_heatmaps <- function(
     fate_matrices,
     top_barplot    = TRUE,
@@ -194,13 +194,13 @@ generate_cloneSize_heatmaps <- function(
   
 }
 # ============================================================
-# 3. Fate 矩阵
+# 3. Fate metrics
 # ============================================================
 
 l_fate_matrices <- get_fate_matrices(
   seurat = seurat.vivo.cross,
   cluster_col = "celltype_final",
-  larry_col = "CloneID",   # 改这里
+  larry_col = "CloneID",   
   sample_col = "orig.ident",
   samples_to_select = samples_to_plot,
   min_cells = 1
@@ -253,7 +253,7 @@ log2fc_vec <- df_order$log2fc
 names(log2fc_vec) <- df_order$CloneID
 groups <- df_order$group
 
-# 同步矩阵
+
 l_fate_matrices <- lapply(
   l_fate_matrices,
   function(m) m[df_order$CloneID, , drop = FALSE]
@@ -281,11 +281,11 @@ l_size_matrices <- lapply(
 )
 
 # ============================================================
-# 6. Replicate 统计
+# 6. Replicate statistics
 # ============================================================
 
 seurat.vivo.cross <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vivo.RDS"
+  "data/CrossAge(exp2)_vivo.RDS"
 )
 md <- seurat.vivo.cross@meta.data %>%
   filter(CloneID %in% df_order$CloneID,
@@ -391,7 +391,7 @@ oo_rep_heatmap <- Heatmap(
 )
 
 # ============================================================
-# 8. 输出
+# 8. Output
 # ============================================================
 
 ht_list <- fate_heatmaps +
@@ -414,9 +414,9 @@ library(Seurat)
 library(dplyr)
 library(tidyr)
 
-# ---------------------- 0. Load 数据 ----------------------
+# ---------------------- 0. Load data ----------------------
 seurat.vivo.cross <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vivo.RDS"
+  "data/CrossAge(exp2)_vivo.RDS"
 )
 
 samples_to_plot <- c("YY", "YO")
@@ -424,7 +424,7 @@ names(samples_to_plot) <- c("YY", "YO")
 
 filename <- "FateHeatmap_YY_vs_YO_log2sorted_grouped_split.pdf"
 
-# ---------------------- 1. 全局预处理 ----------------------
+# ---------------------- 1. global preprocessing ----------------------
 meta <- FetchData(seurat.vivo.cross,
                   c("celltype_final", "CloneID", "orig.ident"))
 meta <- meta %>%
@@ -447,7 +447,7 @@ l_fate_matrices <- get_fate_matrices(
   min_cells=1
 )
 
-# 公共克隆
+# shared clones
 common_clones <- intersect(rownames(l_fate_matrices[[1]]), rownames(l_fate_matrices[[2]]))
 common_clones <- setdiff(common_clones, "0")
 #common_clones <- setdiff(common_clones, ambiguous_young)
@@ -484,20 +484,20 @@ log2fc_vec <- df_order$log2fc
 names(log2fc_vec) <- df_order$CloneID
 groups <- df_order$group
 
-# ---------------------- 同步矩阵 ----------------------
+# ---------------------- Synchronize matrices ----------------------
 l_fate_matrices <- lapply(l_fate_matrices,
                           function(m) m[df_order$CloneID, , drop = FALSE])
 
-# ---------------------- 重新加载数据 ----------------------
+# ---------------------- reload data ----------------------
 seurat.vivo.cross <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vivo.RDS"
+  "data/CrossAge(exp2)_vivo.RDS"
 )
 
 md <- seurat.vivo.cross@meta.data %>%
   filter(CloneID %in% df_order$CloneID,
          orig.ident %in% c("YO","YY"))
 
-# ---------------------- clone × replicate 统计 ----------------------
+# ---------------------- clone × replicate stastics ----------------------
 df_counts <- md %>%
   group_by(CloneID, orig.ident, Rep) %>%
   summarise(n_cells = n(), .groups = "drop")
@@ -629,7 +629,7 @@ yo_rep_heatmap <- Heatmap(
   row_split=groups
 )
 
-# ---------------------- 输出 ----------------------
+# ---------------------- Output ----------------------
 ht_list <- fate_heatmaps + size_heatmaps + hsc_log2fc
 
 pdf(file.path("/project2/sli68423_1316/users/Kailiang/Test_Rcode/2.27",

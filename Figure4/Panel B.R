@@ -7,10 +7,10 @@ library(glue)
 library(tidyr)
 
 seurat.vivo.cross <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vivo.RDS"
+  "data/CrossAge(exp2)_vivo.RDS"
 )
 seurat.vitro.cross <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vitro.RDS"
+  "data/CrossAge(exp2)_vitro.RDS"
 )
 eps <- 1e-4
 seurat.vivo.cross.oo <- subset(seurat.vivo.cross, orig.ident == "OO")
@@ -67,7 +67,7 @@ calc_sister_clone_pool_freq <- function(
   }
   
   # ---------------------------
-  # 1. 找 sister clones
+  # 1. find sister clones
   # ---------------------------
   sister_clones <- bind_rows(
     meta_A %>% select(.data[[clone_col]]) %>% mutate(donor = label_A),
@@ -84,7 +84,7 @@ calc_sister_clone_pool_freq <- function(
     pull(.data[[clone_col]])
   
   # ---------------------------
-  # 2. 先 subset sister clones
+  # 2. subset sister clones
   # ---------------------------
   meta_A_sister <- meta_A %>%
     filter(.data[[clone_col]] %in% sister_clones)
@@ -93,7 +93,7 @@ calc_sister_clone_pool_freq <- function(
     filter(.data[[clone_col]] %in% sister_clones)
   
   # ---------------------------
-  # 3. 🔥 关键：先算 clone size 再 filter
+  # 3. calculate clone size first and then filter
   # ---------------------------
   clone_sizes <- bind_rows(
     meta_A_sister %>% count(.data[[clone_col]]),
@@ -107,7 +107,7 @@ calc_sister_clone_pool_freq <- function(
     pull(.data[[clone_col]])
   
   # ---------------------------
-  # 4. 🔥 用过滤后的 meta 再算 freq
+  # 4. use filtered meta recalculate freq
   # ---------------------------
   meta_A_filtered <- meta_A_sister %>%
     filter(.data[[clone_col]] %in% kept_clones)
@@ -128,7 +128,7 @@ calc_sister_clone_pool_freq <- function(
     rename_with(~ paste0(.x, "_", label_B), -all_of(clone_col))
   
   # ---------------------------
-  # 5. merge（不再需要再 filter）
+  # 5. merge
   # ---------------------------
   full_join(freq_A, freq_B, by = clone_col)
 }
@@ -198,7 +198,7 @@ plot_clone_bias <- function(df, title_text, up_label, down_label) {
     scale_size_continuous(
       name   = "HSC freq",
       limits = c(0, global_max),
-      range  = c(2, 10),   # 推荐 2–10
+      range  = c(2, 10),   
       breaks = scales::pretty_breaks(n = 4)
     ) +
     colorspace::scale_fill_continuous_diverging(
@@ -253,7 +253,7 @@ plot_clone_bias <- function(df, title_text, up_label, down_label) {
     scale_size_continuous(
       name   = "HSC freq",
       limits = c(0, global_max),
-      range  = c(2, 10),   # 推荐 2–10
+      range  = c(2, 10),   
       breaks = scales::pretty_breaks(n = 4)
     ) +
     colorspace::scale_fill_continuous_diverging(
@@ -288,11 +288,9 @@ plot_clone_bias <- function(df, title_text, up_label, down_label) {
       legend.position = "right",
       panel.grid.minor = element_blank(),
       
-      # 🔥 轴
       axis.title = element_text(size = 20, face = "bold"),
       axis.text  = element_text(size = 16, face = "bold"),
       
-      # 🔥 legend
       legend.title = element_text(size = 16, face = "bold"),
       legend.text  = element_text(size = 14, face = "bold")
     )

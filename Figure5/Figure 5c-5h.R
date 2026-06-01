@@ -10,25 +10,25 @@ library(ggplot2)
 ############################
 
 # ML results
-ml_res <- read_csv("/project2/sli68423_1316/users/Kailiang/U1_celltag/data/ml_results_summary.csv")
+ml_res <- read_csv("data/ml_results_summary.csv")
 
 # Feature importance (vitro)
-DVG_33_O_vitro_OO <- read_csv("/project2/sli68423_1316/users/Kailiang/Test_Rcode/ML results/RF/self_renewal/vitro/DVG_33_Old_SF_OO_Top50_Importance.csv")
-DVG_33_Y_vitro_YY <- read_csv("/project2/sli68423_1316/users/Kailiang/Test_Rcode/ML results/RF/self_renewal/vitro/DVG_33_Young_SF_YY_Top50_Importance.csv")
-DVG_80_O_vitro_OO <- read_csv("/project2/sli68423_1316/users/Kailiang/Test_Rcode/ML results/RF/self_renewal/vitro/DVG_80_Old_SF_OO_Top50_Importance.csv")
-DVG_union_O_vitro_OO <- read_csv("/project2/sli68423_1316/users/Kailiang/Test_Rcode/ML results/RF/self_renewal/vitro/DVG_union_Old_SF_OO_Top50_Importance.csv")
-DEG_O_vitro_OO    <- read_csv("/project2/sli68423_1316/users/Kailiang/Test_Rcode/ML results/RF/self_renewal/vitro/LowOutput_Old_SF_OO_Top50_Importance.csv")
+DVG_33_O_vitro_OO <- read_csv("data/DVG_33_Old_SF_OO_Top50_Importance.csv")
+DVG_33_Y_vitro_YY <- read_csv("data/DVG_33_Young_SF_YY_Top50_Importance.csv")
+DVG_80_O_vitro_OO <- read_csv("data/DVG_80_Old_SF_OO_Top50_Importance.csv")
+DVG_union_O_vitro_OO <- read_csv("data/DVG_union_Old_SF_OO_Top50_Importance.csv")
+DEG_O_vitro_OO    <- read_csv("data/LowOutput_Old_SF_OO_Top50_Importance.csv")
 
 # Feature importance (vivo)
-DVG_33_OO <- read_csv("/project2/sli68423_1316/users/Kailiang/Test_Rcode/ML results/RF/self_renewal/vivo/DVG_33_OO_Top50_Importance.csv")
-DVG_33_YY <- read_csv("/project2/sli68423_1316/users/Kailiang/Test_Rcode/ML results/RF/self_renewal/vivo/DVG_33_YY_Top50_Importance.csv")
-DVG_80_OO <- read_csv("/project2/sli68423_1316/users/Kailiang/Test_Rcode/ML results/RF/self_renewal/vivo/DVG_80_OO_Top50_Importance.csv")
-DVG_union_OO <- read_csv("/project2/sli68423_1316/users/Kailiang/Test_Rcode/ML results/RF/self_renewal/vivo/DVG_union_OO_Top50_Importance.csv")
-DEG_OO    <- read_csv("/project2/sli68423_1316/users/Kailiang/Test_Rcode/ML results/RF/self_renewal/vivo/LowOutput_OO_Top50_Importance.csv")
+DVG_33_OO <- read_csv("data/DVG_33_OO_Top50_Importance.csv")
+DVG_33_YY <- read_csv("data/DVG_33_YY_Top50_Importance.csv")
+DVG_80_OO <- read_csv("data/DVG_80_OO_Top50_Importance.csv")
+DVG_union_OO <- read_csv("data/DVG_union_OO_Top50_Importance.csv")
+DEG_OO    <- read_csv("data/LowOutput_OO_Top50_Importance.csv")
 
 # Additional datasets
-DVG_33_Up_O_vitro_OO <- read_csv("/project2/sli68423_1316/users/Kailiang/Test_Rcode/ML results/RF/self_renewal/vitro/DVG_33_Old_SF_OO_Top10_Up_in_High.csv")
-DVG_80_OO <- read_csv("/project2/sli68423_1316/users/Kailiang/Test_Rcode/ML results/RF/self_renewal/vivo/DVG_80_OO_Top50_Importance.csv")
+DVG_33_Up_O_vitro_OO <- read_csv("data/DVG_33_Old_SF_OO_Top10_Up_in_High.csv")
+DVG_80_OO <- read_csv("data/DVG_80_OO_Top50_Importance.csv")
 
 ############################
 # 3. Function: F1 bar plot
@@ -134,7 +134,7 @@ plot_metric_bar <- function(data, dataset_type, y_label,
                          DVG_80 = "DVG80",
                          DVG_union = "DVGunion")
     ) %>%
-    # 👉 把 F1 和 accuracy 转成长格式
+  
     pivot_longer(
       cols = c(Accuracy),#macro_F1, 
       names_to = "metric",
@@ -149,14 +149,14 @@ plot_metric_bar <- function(data, dataset_type, y_label,
   p <- ggplot(df, aes(
     x = condition,
     y = value,
-    fill = metric   # 👉 颜色根据 metric
+    fill = metric   
   )) +
     geom_bar(
       stat = "identity",
       position = position_dodge(width = 0.75),
       width = 0.65
     ) +
-    # 👉 蓝 / 红 两种颜色
+ 
     scale_fill_manual(values = c(
       "F1 Score" = "#1f77b4",
       "Accuracy" = "#e74c3c"
