@@ -8,10 +8,10 @@ library(ggplot2)
 library(scales)
 
 seurat.vivo.cross <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vivo.RDS"
+  "data/CrossAge(exp2)_vivo.RDS"
 )
 seurat.vitro.cross <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vitro.RDS"
+  "data/CrossAge(exp2)_vitro.RDS"
 )
 
 seurat.vivo.cross.oo <- subset(seurat.vivo.cross, orig.ident == "OO")
@@ -279,12 +279,10 @@ p_old <- ggplot(df_plot_old, aes(
     plot.title = element_text(face = "bold", hjust = 0.5),
     legend.position = "right",
     panel.grid.minor = element_blank(),
-    
-    # 🔥 轴
+
     axis.title = element_text(size = 20, face = "bold"),
     axis.text  = element_text(size = 16, face = "bold"),
     
-    # 🔥 legend
     legend.title = element_text(size = 16, face = "bold"),
     legend.text  = element_text(size = 14, face = "bold")
   )
