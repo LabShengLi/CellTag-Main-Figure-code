@@ -28,7 +28,7 @@ p <- add_argument(p, "--binarize_k", help = "k used in SingleCellDataBinarizatio
 p <- add_argument(p, "--metric_less", help = "MetricBasedFiltering threshold with comparison='less'", type =
     "numeric", default = 20)
 p <- add_argument(p, "--metric_greater", help = "MetricBasedFiltering threshold with comparison='greater'", type =
-    "numeric", default = 2)
+    "numeric", default = 1)
 p <- add_argument(p, "--correlation_cutoff", help = "CloneCalling correlation.cutoff", type = "numeric", default = 0.7)
 p <- add_argument(p, "--skip_raw_read", help = "Skip read raw input", flag = TRUE)
 p <- add_argument(p, "--count_rds", help = "Skip read raw input", type = "str", default = "CellTagMatrixCount.RDS")
