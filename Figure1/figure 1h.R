@@ -1,8 +1,8 @@
 seurat.vivo.exp2 <- readRDS(
-  "/project2/sli68423_1316/users/Kailiang/U1_celltag/data/seurat_vivo_exp2.rds"
+  "data/Exp2(exp1)_vivo.RDS"
 )
 seurat.vitro.exp2 <- readRDS(
-  "/project2/sli68423_1316/users/Kailiang/U1_celltag/data/seurat_vitro_exp2.rds"
+  "data/Exp2(exp1)_vitro.RDS"
 )
 library(Seurat)
 library(purrr)
@@ -26,7 +26,7 @@ lineage_map <- c(
   "LMPP-1" = "MPP",
   "LMPP-2" = "MPP",
   # ====================
-  # CMP（新增）
+  # CMP
   # ====================
   "CMP" = "CMP",
   
@@ -92,7 +92,7 @@ common_clones_exp2 <- intersect(
   unique(seurat.vivo.exp2.sub$CloneID_V2)
 )
 
-message("exp2 共有 clone 数量 = ", length(common_clones_exp2))
+message("exp2 total clone number = ", length(common_clones_exp2))
 
 common_clones_exp2_young <- common_clones_exp2[grepl("_Y", common_clones_exp2)]
 common_clones_exp2_old   <- common_clones_exp2[grepl("_O", common_clones_exp2)]
@@ -147,7 +147,7 @@ get_fate_matrices <- function(seurat, samples_to_select, ...) {
   return(fate_mat_l)
 }
 
-# ---------------------- 2.1 fate heatmap 函数 (只在第一个 sample 显示标签) ----------------------
+# ---------------------- 2.1 fate heatmap  ----------------------
 generate_fate_heatmaps <- function(
     fate_matrices,
     top_barplot    = TRUE,
@@ -268,7 +268,7 @@ mat_joint <- cbind(
   Vivo  = fate_matrices$Vivo
 )
 dist_mat <- dist(mat_joint, method = "euclidean")
-# 或者：dist(mat_joint, method = "manhattan")
+
 
 hc_joint <- hclust(dist_mat, method = "ward.D2")
 clone_order <- rownames(mat_joint)[hc_joint$order]
@@ -309,5 +309,5 @@ h_exp2_young <- generate_fate_heatmaps(
 )
 draw(
   h_exp2_young,
-  gap = unit(8, "mm")   # ⭐ 两个 heatmap 之间的间距
+  gap = unit(8, "mm")   
 )
