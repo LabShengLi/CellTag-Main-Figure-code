@@ -11,8 +11,6 @@
 
 ##########################
 
-setwd('/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts')
-
 ## Load packages ##
 
 load_all_packages <- function() {
@@ -101,7 +99,7 @@ external_hsc_plots$density_mean_adj
 
 #### Calculate heterogeneity between young and old ####
 
-bm_obj <- readRDS('/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltype_annotation/Other_human_single_cell_bone_marrow_data/GSE189161_data/GSE189161_25yr_to_77yr_BM_harmonized.rds')
+bm_obj <- readRDS('file_input/GSE189161_25yr_to_77yr_BM_harmonized.rds')
 Idents(bm_obj) <- 'RNA_snn_res.0.2'
 table(Idents(bm_obj))
 bm_HSC <- subset(
@@ -241,7 +239,7 @@ panel_list_human <- lapply(
   }
 )
 names(panel_list_human) <- genes_of_interest_human
-pdf("/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Figure5/Human_DVG_overlap/Human_HSC_cross_species_overlap_genes.pdf",
+pdf("Human_HSC_cross_species_overlap_genes.pdf",
   width = 12,
   height = 6)
 for(g in genes_of_interest_human){
@@ -258,7 +256,7 @@ dev.off()
 
 # Human DVG Over-representation analysis (ORA)
 
-file_name <- "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Figure3/Tables/Human_HSC_DVG__dataset_summary.xlsx"
+file_name <- "file_input/Human_HSC_DVG__dataset_summary.xlsx"
 excel_sheets(file_name)
 dvg_FC_0.5_df <- read_excel(file_name, sheet = "Overlap_FC>=0.05")
 colnames(dvg_FC_0.5_df)
@@ -457,7 +455,7 @@ p_human_ora_bar
 
 # PROGENy pathway scores 
 
-bm_obj <- readRDS('/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltype_annotation/Other_human_single_cell_bone_marrow_data/GSE189161_data/GSE189161_25yr_to_77yr_BM_harmonized.rds')
+bm_obj <- readRDS('file_input/GSE189161_25yr_to_77yr_BM_harmonized')
 Idents(bm_obj) <- 'RNA_snn_res.0.2'
 table(Idents(bm_obj))
 bm_HSC <- subset(bm_obj,subset = RNA_snn_res.0.2 == "0")
@@ -590,9 +588,218 @@ cor_df$DVG_set <- recode(cor_df$DVG_set,
                          "DVG0251" = "FC ≥ 0.25")
 cor_df
 
-
-
 ###################################################
+
+
+# GSE189161_DVG_3_Age_Comparisons.xlsx
+
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+
+file_path <- "file_output/GSE189161_DVG_3_Age_Comparisons.xlsx"
+
+# check sheet names
+sheet_names <- excel_sheets(file_path)
+sheet_names
+
+# read all sheets
+dvg_list <- sheet_names %>%
+  set_names() %>%
+  map(~ read_excel(file_path, sheet = .x))
+
+# ------------------------------------------------------------
+# Build density dataframe
+# Young and Old from Young_vs_Old
+# Mid = average of Mid values from Young_vs_Mid and Mid_vs_Old
+# ------------------------------------------------------------
+
+density_df <- dvg_list$Young_vs_Old %>%
+  select(
+    gene,
+    mean_adjusted_var_Young,
+    mean_adjusted_var_Old
+  ) %>%
+  left_join(
+    dvg_list$Young_vs_Mid %>%
+      select(gene, mean_adjusted_var_Mid_YM = mean_adjusted_var_Mid),
+    by = "gene"
+  ) %>%
+  left_join(
+    dvg_list$Mid_vs_Old %>%
+      select(gene, mean_adjusted_var_Mid_MO = mean_adjusted_var_Mid),
+    by = "gene"
+  ) %>%
+  mutate(
+    mean_adjusted_var_Mid = rowMeans(
+      cbind(mean_adjusted_var_Mid_YM, mean_adjusted_var_Mid_MO),
+      na.rm = TRUE
+    )
+  ) %>%
+  select(
+    gene,
+    mean_adjusted_var_Young,
+    mean_adjusted_var_Mid,
+    mean_adjusted_var_Old
+  ) %>%
+  pivot_longer(
+    cols = starts_with("mean_adjusted_var_"),
+    names_to = "group",
+    values_to = "mean_adjusted_variance"
+  ) %>%
+  mutate(
+    group = gsub("^mean_adjusted_var_", "", group),
+    group = factor(group, levels = c("Young", "Mid", "Old"))
+  ) %>%
+  filter(
+    !is.na(mean_adjusted_variance),
+    is.finite(mean_adjusted_variance),
+    mean_adjusted_variance > 0
+  )
+
+View(density_df)
+
+# create the wide table 
+density_df
+
+density_wide <- density_df %>%
+  pivot_wider(
+    names_from = group,
+    values_from = mean_adjusted_variance,
+    names_prefix = "majv_"
+  ) %>%
+  rename(Y = majv_Young, M = majv_Mid, O = majv_Old)
+nrow(density_wide) # 271 
+View(density_wide)
+density_wide_complete <- density_wide[complete.cases(density_wide), ]
+View(density_wide_complete)
+gene_list <- c("AC013436.6", "ACTB", "AKIRIN1", "ALAD", "ALDH1A1", "ANKRD12", "AREG",
+               "ARHGAP9", "ARL6IP1", "ATP1B1", "ATPIF1", "AVP", "BMI1", "BNIP3L",
+               "BTF3L4", "C3orf80", "CALR", "CCAR1", "CD164", "CD69", "CD74",
+               "CDK2AP1", "CFAP36", "CHMP1B", "CHMP2B", "CLEC11A", "CNOT6", "COTL1",
+               "CPNE3", "CPPED1", "CRHBP", "CST3", "CXCR4", "CYTL1", "DCUN1D1",
+               "DDX50", "DHFR", "DIP2A", "DNAJB1", "DNAJC9", "DNMT3B", "DOLPP1",
+               "DPPA4", "DUOX1", "DUSP1", "DUSP6", "DUT", "DYNLRB1", "EBNA1BP2",
+               "ELK4", "EMB", "EREG", "ERMP1", "FAM120A", "FBXL5", "FBXO2", "FGD2",
+               "FOS", "FOSB", "FSIP2", "GAB1", "GADD45A", "GAPDH", "GAR1", "GATA2",
+               "GBAS", "GGCT", "GNAI1", "GNG10", "H2AFZ", "HDGF", "HEMGN",
+               "HIST1H4C", "HLA.DRB5", "HLF", "HMGB1", "HMGB2", "HNRNPAB", "HPCAL1",
+               "HPRT1", "HSP90AA1", "HSP90B1", "HSPA1A", "HSPA5", "HSPB11", "IGHM",
+               "IGLL1", "IL1B", "ITM2A", "JUN", "JUNB", "KIAA0101", "KLF10", "KLF6",
+               "KLHL3", "LATS1", "LBR", "LINC00998", "LMO4", "LRRC75A.AS1", "LYZ",
+               "MAP4K5", "MAPRE1", "MARCKSL1", "MCL1", "MDK", "MED1", "METTL7A",
+               "MIF", "MLLT3", "MMRN1", "MPC2", "MPO", "MRPL18", "MRPL45",
+               "MTRNR2L1", "MYCT1", "NAA15", "NARS", "NBR1", "NDC80", "NDUFS6",
+               "NFIA", "NFKBIA", "NFKBIZ", "NIFK", "NIPSNAP3A", "NOA1", "NOP58",
+               "NR4A1", "NR4A2", "NXF1", "OAT", "PCNA", "PDZD8", "PIM1", "PLAC8",
+               "PLEK", "PLXDC2", "PPP1R11", "PPP1R18", "PRDX2", "PRNP", "PRPF38B",
+               "PTGER4", "PTPN12", "PVRIG", "PXN", "RAB10", "RAB13", "RAB27B",
+               "RAB5A", "RAB8B", "RAD50", "RAP1A", "RAP2B", "RARA", "RASA1",
+               "RBMS1", "RDH11", "REXO2", "RHOT1", "RSRC2", "S100A4", "S100A6",
+               "SBNO1", "SDPR", "SERPINE2", "SLBP", "SLC12A6", "SLC39A8", "SLC40A1",
+               "SLC44A1", "SMC3", "SMC4", "SMIM24", "SOS1", "SPINK2", "SREK1",
+               "SREK1IP1", "SRGN", "STMN1", "STXBP3", "TFRC", "TM7SF3", "TMED8",
+               "TMEFF2", "TMEM94", "TMSB4X", "TNFAIP3", "TNFRSF1A", "TNFSF13B",
+               "TOPORS", "TSC22D3", "TSPAN13", "TUBA1A", "TUBA1B", "TUBA1C", "TUBB",
+               "TWSG1", "TYMS", "UFM1", "UROD", "VPS35", "WRNIP1", "XIST", "ZC3H13",
+               "ZFP36", "ZFP36L2", "ZMYND11", "ZNF37A", "ZNF770", "ZRANB2")
+
+density_wide_filtered <- density_wide_complete %>%
+  filter(gene %in% gene_list)
+
+nrow(density_wide_filtered)
+library(writexl)
+write_xlsx(density_wide_filtered, "Human_3_Age_density_wide_complete_213_genes.xlsx")
+
+# ------------------------------------------------------------
+# Density plot
+# ------------------------------------------------------------
+
+p_mav_density <- ggplot(
+  density_filtered_long  ,
+  aes(
+    x = mean_adjusted_variance,
+    color = group,
+    fill = group
+  )
+) +
+  geom_density(
+    linewidth = 1.1,
+    adjust = 1,
+    alpha = 0.15
+  ) +
+  scale_color_manual(values = c(
+    Young = "cornflowerblue",
+    Mid   = "#E75480",
+    Old   = "#E58B1C"
+  )) +
+  scale_fill_manual(values = c(
+    Young = "cornflowerblue",
+    Mid   = "#E75480",
+    Old   = "#E58B1C"
+  )) +
+  theme_classic(base_size = 22) +
+  theme(
+    axis.title = element_text(face = "bold", size = 26),
+    axis.text = element_text(size = 20, color = "black"),
+    legend.title = element_text(size = 22, face = "bold"),
+    legend.text = element_text(size = 20),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Mean-adjusted variance",
+    y = "Density",
+    color = "Group",
+    fill = "Group"
+  )
+p_mav_density
+
+#################################
+
+# Wilcoxon test 
+
+density_filtered_long
+density_wide_filtered
+library(tibble)
+
+# Compute median per group
+group_medians <- density_filtered_long %>%
+  group_by(group) %>%
+  summarise(median = median(mean_adjusted_variance, na.rm = TRUE), .groups = "drop")
+group_medians
+# Convert the p-value matrix into a tidy results table with medians
+pw_table <- as.data.frame(pw_result$p.value) %>%
+  rownames_to_column("group2") %>%
+  pivot_longer(-group2, names_to = "group1", values_to = "p_adj") %>%
+  filter(!is.na(p_adj)) %>%
+  left_join(group_medians, by = c("group1" = "group")) %>%
+  rename(median_group1 = median) %>%
+  left_join(group_medians, by = c("group2" = "group")) %>%
+  rename(median_group2 = median) %>%
+  mutate(
+    comparison = paste(group1, "vs", group2),
+    median_diff = median_group1 - median_group2,
+    higher_group = case_when(
+      median_group1 > median_group2 ~ group1,
+      median_group2 > median_group1 ~ group2,
+      TRUE                          ~ "equal"
+    ),
+    significance = case_when(
+      p_adj < 0.001 ~ "***",
+      p_adj < 0.01  ~ "**",
+      p_adj < 0.05  ~ "*",
+      TRUE          ~ "ns"
+    )
+  ) %>%
+  select(comparison, group1, group2,
+         median_group1, median_group2, median_diff,
+         higher_group, p_adj, significance)
+
+View(pw_table)
+
+####################################################################
 
 
 # End of this script 

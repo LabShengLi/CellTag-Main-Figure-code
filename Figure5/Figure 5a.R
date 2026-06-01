@@ -7,14 +7,10 @@ library(readxl)
 # =========================
 # 1. Load data
 # =========================
-seurat.vivo.cross <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vivo.RDS"
-)
-seurat.vitro.cross <- readRDS(
-  "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vitro.RDS"
-)
+seurat.vivo.cross <- readRDS("data/CrossAge(exp2)_vivo.RDS")
+seurat.vitro.cross <- readRDS("data/CrossAge(exp2)_vitro.RDS")
 
-file_path <- "/project2/sli68423_1316/users/Kailiang/U1_celltag/U01/Fig3_DVG_Master_Table_0305.xlsx"
+file_path <- "file_input/Fig3_DVG_Master_Table.xlsx"
 
 
 # =========================

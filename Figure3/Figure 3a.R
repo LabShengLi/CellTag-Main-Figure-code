@@ -9,7 +9,7 @@ library(ggpubr)
 # =========================
 # Step 1: Load data
 # =========================
-infn <- "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge_vitro.RDS"
+infn <- "data/CrossAge(exp2)_vitro.RDS"
 s <- readRDS(infn)
 
 # =========================

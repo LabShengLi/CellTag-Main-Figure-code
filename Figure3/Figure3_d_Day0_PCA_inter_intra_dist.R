@@ -11,8 +11,6 @@
 
 ##########################
 
-setwd('/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts')
-
 ## Load packages ##
 
 load_all_packages <- function() {
@@ -31,13 +29,13 @@ load_all_packages <- function() {
 load_all_packages()
 
 # set working directory
-setwd('Main_figures/Figure3/Figures/')
+setwd('...')
 
 #############################
 
 # read in seurat object
-# seurat_celltag_in_vitro <- readRDS('/project2/sli68423_1316/users/Kailiang/U1_celltag/data/seurat.vitro.cross.no_ambiguous_cloneID.rds')
-seurat_celltag_in_vitro <- readRDS("/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/test_folder/Data_objects/crossage_vitro.3_2.rds")
+
+seurat_celltag_in_vitro <- readRDS("data/CrossAge(exp2)_vitro.RDS")
 
 colnames(seurat_celltag_in_vitro@meta.data)
 meta <- seurat_celltag_in_vitro@meta.data  
@@ -60,31 +58,7 @@ table(meta_HSC_only$sampleName) # O_vitro: 1218 ; Y_vitro: 2060
 
 ## Aging-up DVGs, we will use these genes as feature to compute clonal PCA distance ##
 
-aging_up_DVGs <- c(
-  "Actb","Lmnb1","Cd9","Anp32e","Cct6a","Ywhaz","Eif4g2","Nap1l1","Alyref","Hnrnpd",
-  "Pa2g4","Bax","Ube2m","Tubb5","Ybx3","Lyar","Myb","Hnrnpu","Fam136a","Mrpl54",
-  "Cdv3","Timm8a1","Lamtor4","Dph3","Ncl","Nucks1","Hnrnpab","Banf1","Atf4","Hdgf",
-  "Hspd1","Mybbp1a","Cacybp","Lmo2","Hmgn2","Aldoa","Mrpl12","Gclm","Ptges3","Tagln2",
-  "Dynll2","Svil","Gapdh","Rgs18","Lsm2","H2afy","Skp1a","Pgam1","Cenpv","Nhp2",
-  "Tceal8","Dok2","Exoc4","Cdkn2d","Rap1b","Ldha","Tuba1b","Unc119","Idi1","Npm3",
-  "Pmvk","Hsph1","Timm13","Smc2","Calr","Eno1","Sox4","Smc4","Tomm5","Plscr1",
-  "Cks1b","Ubald2","Tuba1a","Asns","Hnrnpa3","Cdca3","Sap30","Tespa1","Sod1",
-  "Rangap1","Myh9","Pbk","Msi2","Srm","Fut8","Pdcd4","0610010K14Rik","Tpm1","Sdf2l1",
-  "Mef2c","Bub3","Hspa8","Hoxb2","Jund","Hirip3","Jpt1","Mvd","Rgcc","A430005L14Rik",
-  "Fam3c","Hmgb3","Nt5dc2","Nolc1","Tacc3","Myef2","Clec4d","H1f0","Crip1","Hnrnpul2",
-  "Gng11","Mctp1","Xbp1","Qdpr","Id1","Rrm2","Cenpb","Rangrf","Kpna2","Knstrn",
-  "Dbf4","Set","Nuf2","Rad21","Tuba8","Ddt","Terf1","Il21r","Nrgn","Itga6","Mthfd2",
-  "Ube2s","Bin1","Birc5","Ggct","Hmgcs1","B3gnt5","Phlda3","Fabp5","Rpl31","Mycn",
-  "Myl10","Serpinb1a","Clec4e","Fbxo5","Egfl7","Atp5g1","Fchsd2","Ttc32","Ccng1",
-  "Frat2","Plek","Pimreg","Eif2b3","Psrc1","Fli1","Lmo1","Bnip3","Gatm","Cdk1",
-  "Uhrf1","Cited2","Kif22","Cdca8","Runx1","Cycs","Ydjc","Afp","Sgo1","Zbed3",
-  "Plxdc2","Car2","Igf1r","Tcf15","Racgap1","Snhg3","Mc5r","Fzr1","Calm2","Rpl23a",
-  "Cox7b","Kif15","Enah","Cish","Pitpnc1","Aurkb","Cip2a","Lgals9","Cdc20","Diaph3",
-  "Hjurp","Zmynd19","Ppp1r14b","Rps17","Cbfa2t3","Kif2c","Cfl1","Bub1b","Nkg7",
-  "Cep55","Rad51ap1"
-)
-
-# updated in 03/07/2026 aging-up gene list (gt_0.05FC_2_exp)
+# aging-up gene list (gt_0.05FC_2_exp)
 
 aging_up_DVGs <- c(
   "Aldh1a1","Nupr1","Slamf1","Cdkn2c","Cd48","Slc14a1","Otos","Krt18","Apoe","Hmgb2",
@@ -250,7 +224,7 @@ clone_heterogeneity_summary_day0_in_vitro <- res_inter$summary
 head(clone_heterogeneity_summary_day0_in_vitro)
 
 # Save 
-write.csv(clone_heterogeneity_summary_day0_in_vitro,file = "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Figure3/Tables/clonal_PCS_dist_summary_day0_in_vitro.csv",row.names = FALSE)  
+write.csv(clone_heterogeneity_summary_day0_in_vitro,file = "clonal_PCS_dist_summary_day0_in_vitro.csv",row.names = FALSE)  
   
 ##################################################
 
