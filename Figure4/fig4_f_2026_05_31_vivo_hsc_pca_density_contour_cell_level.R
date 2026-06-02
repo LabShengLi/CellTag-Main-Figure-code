@@ -1,4 +1,23 @@
 #!/usr/bin/env Rscript
+`#
+# vivo HSC PCA — SINGLE-CELL level (pair with *_v2.R for pseudo-bulk / sample level)
+#
+# Data: CrossAge(exp2)_vivo.RDS; CloneID != 0; celltype_final == "HSC"
+# Groups: orig.ident OO / OY / YO / YY (4 transplant combos); Rep -> mouse_id (metadata)
+#
+# PCA: Seurat NormalizeData -> HVG (2000) -> ScaleData -> RunPCA on all HSC cells (30 PCs)
+# Unit of analysis for PERMANOVA / PERMDISP: one row per cell (cell-level PC distance matrix)
+# Cross-recipient asymmetry: adonis2(d ~ donor_age * host_age, by = margin) without strata
+#   (strata = mouse_id invalid here: donor/host constant within mouse; see v2 for replicate-level test)
+#
+# Outputs (wdir):
+#   - PERMANOVA global + pairwise (BH) on cell PC scores
+#   - PERMANOVA donor_age * host_age interaction (cell-level, margin; no strata)
+#   - PERMDISP global + per-group dispersion on cell PC scores (betadisper + permutest)
+#   - Group centroids (colMeans over cells, PC1-30) + Euclidean distance matrix / pairs
+#   - PC1/PC2 density contours; KDE density peaks + peak distance matrix (PC1-PC2 only)
+#
+# See: fig4_f_2026_05_31_vivo_hsc_pca_density_contour_v2_bulk_level.R for mouse-level pseudo-bulk analysis
 
 rm(list = ls())
 
@@ -16,25 +35,30 @@ suppressPackageStartupMessages({
 # -------------------------------------------------------------------------
 # Output directory
 # -------------------------------------------------------------------------
-wdir <- "figure4"
+wdir <- "/project2/sli68423_1316/projects/U01_aim2/results/2026_05_17_scpa"
 dir.create(wdir, recursive = TRUE, showWarnings = FALSE)
+setwd(wdir)
 
 # -------------------------------------------------------------------------
 # Input data
 # -------------------------------------------------------------------------
-infn2 <- "CrossAge(exp2)_vivo.RDS"
+infn2 <- "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge(exp2)_vivo.RDS"
 
 ss <- readRDS(infn2)
-setwd(wdir)
 ss <- subset(ss, subset = CloneID != 0)
 ss_hsc <- subset(ss, subset = celltype_final == "HSC")
 
 group_order <- c("OO", "OY", "YO", "YY")
 group_order <- group_order[group_order %in% unique(ss_hsc$orig.ident)]
 
-# Group-level analysis only (no replicate stratification)
-# vegan::adonis2 default permutations = 999 (min resolvable p = 1/1000 = 0.001)
-PERMANOVA_PERMUTATIONS <- 999
+ss_hsc$orig.ident <- as.character(ss_hsc$orig.ident)
+ss_hsc$Rep <- as.character(ss_hsc$Rep)
+ss_hsc$mouse_id <- gsub("_", "-", paste(ss_hsc$orig.ident, ss_hsc$Rep, sep = "-"), fixed = TRUE)
+ss_hsc$donor_age <- ifelse(substr(ss_hsc$orig.ident, 1, 1) == "O", "Old", "Young")
+ss_hsc$host_age <- ifelse(substr(ss_hsc$orig.ident, 2, 2) == "O", "Old", "Young")
+
+# PERMANOVA / PERMDISP: cell-level; min resolvable p = 1 / (permutations + 1)
+PERMANOVA_PERMUTATIONS <- 9999
 
 format_p_sci <- function(p, permutations = PERMANOVA_PERMUTATIONS) {
     p_floor <- 1 / (permutations + 1)
@@ -64,6 +88,41 @@ add_permanova_p_sci_cols <- function(df, permutations = PERMANOVA_PERMUTATIONS) 
         out$p_adj_BH_sci <- format_p_sci(out$p_adj_BH, permutations = permutations)
     }
     out
+}
+
+get_col_or_na <- function(df, nm) {
+    if (nm %in% colnames(df)) {
+        return(df[[nm]])
+    }
+    rep(NA_real_, nrow(df))
+}
+
+extract_permdisp_group_dispersion_df <- function(permdisp_obj, group_order, test_label) {
+    group_levels <- as.character(permdisp_obj$group)
+    obs_distances <- as.numeric(permdisp_obj$distances)
+    group_mean <- stats::setNames(
+        as.numeric(permdisp_obj$group.distances),
+        names(permdisp_obj$group.distances)
+    )
+    if (is.null(names(group_mean)) || any(names(group_mean) == "")) {
+        names(group_mean) <- levels(permdisp_obj$group)
+    }
+
+    purrr::map_dfr(group_order, function(g) {
+        idx <- group_levels == g
+        dists <- obs_distances[idx]
+        tibble::tibble(
+            orig.ident = g,
+            mean_distance_to_centroid = unname(group_mean[[g]]),
+            median_distance_to_centroid = stats::median(dists, na.rm = TRUE),
+            sd_distance_to_centroid = stats::sd(dists, na.rm = TRUE),
+            n = sum(idx)
+        )
+    }) %>%
+        dplyr::mutate(
+            orig.ident = factor(orig.ident, levels = group_order),
+            test = test_label
+        )
 }
 
 # -------------------------------------------------------------------------
@@ -202,7 +261,7 @@ print(permanova_global_df)
 message("PERMANOVA pairwise comparisons (BH-adjusted):")
 print(permanova_pairwise_df)
 
-message("Cross-recipient asymmetry (OO vs OY vs YO vs YY):")
+message("Cross-recipient asymmetry — descriptive pairwise R2 (OO vs OY vs YO vs YY):")
 print(permanova_asymmetry_df)
 print(permanova_asymmetry_summary_df)
 
@@ -211,6 +270,153 @@ message(
     " (vegan default = 999); min resolvable p = ",
     format_p_sci(0)[[1]]
 )
+
+# -------------------------------------------------------------------------
+# Cell-level distance matrix + metadata (PERMDISP + donor×host interaction)
+# -------------------------------------------------------------------------
+cell_meta_interaction <- data.frame(
+    mouse_id = ss_hsc$mouse_id,
+    orig.ident = factor(ss_hsc$orig.ident, levels = group_order),
+    donor_age = factor(ss_hsc$donor_age, levels = c("Young", "Old")),
+    host_age = factor(ss_hsc$host_age, levels = c("Young", "Old"))
+)
+cell_dist <- dist(pca_emb)
+
+# -------------------------------------------------------------------------
+# PERMDISP on cell-level PC scores (vegan::betadisper + permutest)
+# -------------------------------------------------------------------------
+permdisp_global <- vegan::betadisper(cell_dist, cell_meta_interaction$orig.ident)
+permdisp_global_test <- vegan::permutest(
+    permdisp_global,
+    permutations = PERMANOVA_PERMUTATIONS
+)
+
+permdisp_global_df <- tibble::as_tibble(
+    as.data.frame(permdisp_global_test$tab),
+    rownames = "term"
+)
+colnames(permdisp_global_df) <- gsub("\\s+", ".", colnames(permdisp_global_df))
+
+if (!"Pr(>F)" %in% colnames(permdisp_global_df)) {
+    p_col <- colnames(permdisp_global_df)[grepl("^Pr", colnames(permdisp_global_df))]
+    if (length(p_col) > 0) {
+        colnames(permdisp_global_df)[match(p_col[1], colnames(permdisp_global_df))] <- "Pr(>F)"
+    }
+}
+
+permdisp_global_df <- permdisp_global_df %>%
+    dplyr::mutate(
+        df = get_col_or_na(., "Df"),
+        sumOfSqs = dplyr::coalesce(get_col_or_na(., "Sum.Sq"), get_col_or_na(., "Sum.Sqs")),
+        meanSqs = dplyr::coalesce(get_col_or_na(., "Mean.Sq"), get_col_or_na(., "Mean.Sqs")),
+        F = get_col_or_na(., "F"),
+        p_value = get_col_or_na(., "Pr(>F)")
+    ) %>%
+    dplyr::select(term, df, sumOfSqs, meanSqs, F, p_value) %>%
+    dplyr::mutate(
+        test = "PERMDISP global (cell-level PC scores, orig.ident)",
+        n_pcs = ncol(pca_emb),
+        n_cells = nrow(pca_emb),
+        permutations = PERMANOVA_PERMUTATIONS,
+        p_value_floor = 1 / (PERMANOVA_PERMUTATIONS + 1),
+        p_value_sci = format_p_sci(p_value)
+    )
+
+permdisp_group_df <- extract_permdisp_group_dispersion_df(
+    permdisp_global,
+    group_order = group_order,
+    test_label = "PERMDISP group dispersion (cell-level PC scores, orig.ident)"
+) %>%
+    dplyr::mutate(
+        n_pcs = ncol(pca_emb),
+        permutations = PERMANOVA_PERMUTATIONS
+    )
+
+message("PERMDISP global (cell-level, ", ncol(pca_emb), " PCs):")
+print(permdisp_global_df)
+
+message("PERMDISP per-group dispersion (mean distance to group centroid):")
+print(permdisp_group_df)
+
+# -------------------------------------------------------------------------
+# donor_age * host_age interaction PERMANOVA (cell-level, no strata)
+# strata = mouse_id omitted: donor/host labels are constant within each mouse, so
+# within-stratum permutations cannot test interaction (Pr(>F) -> 1). Labels are
+# permuted across all cells; pair with *_v2.R for replicate-level formal inference.
+# -------------------------------------------------------------------------
+permanova_interaction <- adonis2(
+    cell_dist ~ donor_age * host_age,
+    data = cell_meta_interaction,
+    permutations = PERMANOVA_PERMUTATIONS,
+    by = "margin"
+)
+interaction_note <- paste(
+    "Cell-level interaction without strata (donor/host invariant within mouse_id).",
+    "Formal replicate-level asymmetry: see HSC_PERMANOVA_donor_host_interaction_sample_level_v2.tsv."
+)
+
+permanova_interaction_df <- tibble::as_tibble(permanova_interaction, rownames = "term") %>%
+    dplyr::mutate(
+        test = "PERMANOVA donor_age * host_age (cell-level, margin, no strata)",
+        n_pcs = ncol(pca_emb),
+        n_cells = nrow(pca_emb),
+        n_mice = length(unique(cell_meta_interaction$mouse_id)),
+        permutations = PERMANOVA_PERMUTATIONS,
+        p_value_floor = 1 / (PERMANOVA_PERMUTATIONS + 1),
+        p_value_sci = format_p_sci(`Pr(>F)`),
+        note = interaction_note
+    )
+
+message("PERMANOVA donor_age * host_age interaction (cell-level, no strata):")
+print(permanova_interaction_df)
+
+# -------------------------------------------------------------------------
+# Group centroids in PC1–30 and Euclidean distances
+# -------------------------------------------------------------------------
+compute_centroid_distance <- function(emb_mat, meta_group, group_order) {
+    centroid_list <- lapply(group_order, function(g) {
+        cells_use <- names(meta_group)[meta_group == g]
+        colMeans(emb_mat[cells_use, , drop = FALSE])
+    })
+    names(centroid_list) <- group_order
+
+    centroid_mat <- do.call(rbind, centroid_list)
+    dist_mat <- as.matrix(stats::dist(centroid_mat, method = "euclidean"))
+    dist_mat <- dist_mat[group_order, group_order, drop = FALSE]
+
+    dist_long <- as.data.frame(as.table(dist_mat))
+    colnames(dist_long) <- c("group1", "group2", "euclidean_distance")
+    dist_long <- dist_long[
+        match(dist_long$group1, group_order) < match(dist_long$group2, group_order),
+    ]
+
+    list(
+        centroid_mat = centroid_mat,
+        dist_mat = dist_mat,
+        dist_long = dist_long
+    )
+}
+
+pca_centroid_res <- compute_centroid_distance(
+    emb_mat = pca_emb,
+    meta_group = ss_hsc$orig.ident,
+    group_order = group_order
+)
+
+pca_group_centroid_df <- tibble::rownames_to_column(
+    as.data.frame(pca_centroid_res$centroid_mat),
+    var = "orig.ident"
+) %>%
+    dplyr::mutate(orig.ident = factor(orig.ident, levels = group_order))
+
+message("Group centroids in PCA space (PC1–", ncol(pca_emb), ", colMeans per group):")
+print(pca_group_centroid_df)
+
+message("Group centroid Euclidean distance matrix (PC1–", ncol(pca_emb), "):")
+print(round(pca_centroid_res$dist_mat, 4))
+
+message("Group centroid pairwise Euclidean distances (PC1–", ncol(pca_emb), "):")
+print(pca_centroid_res$dist_long)
 
 pca_plot_df <- data.frame(
     PC1 = pca_emb[, 1],
@@ -546,6 +752,21 @@ write_distance_matrix_tsv(
 )
 
 write_tsv(
+    pca_group_centroid_df,
+    file.path(wdir, "HSC_group_centroid_PC1_30_PCA.tsv")
+)
+
+write_distance_matrix_tsv(
+    pca_centroid_res$dist_mat,
+    file.path(wdir, "HSC_group_centroid_PC1_30_euclidean_distance_matrix.tsv")
+)
+
+write_tsv(
+    pca_centroid_res$dist_long,
+    file.path(wdir, "HSC_group_centroid_PC1_30_euclidean_distance_pairs.tsv")
+)
+
+write_tsv(
     permanova_global_df,
     file.path(wdir, "HSC_PERMANOVA_global_PC_scores.tsv")
 )
@@ -570,6 +791,26 @@ write_tsv(
     file.path(wdir, "HSC_PERMANOVA_cross_recipient_asymmetry.tsv")
 )
 
+write_tsv(
+    permdisp_global_df,
+    file.path(wdir, "HSC_PERMDISP_global_PC_scores.tsv")
+)
+
+write_tsv(
+    permdisp_group_df,
+    file.path(wdir, "HSC_PERMDISP_group_dispersion_PC_scores.tsv")
+)
+
+write_tsv(
+    permanova_interaction_df,
+    file.path(wdir, "HSC_PERMANOVA_donor_host_interaction_PC_scores.tsv")
+)
+
 save.image("2026_05_31_vivo_hsc_pca_density_contour.RData")
 
-message("Finished: density contour peak plot, peak distance matrix, and PERMANOVA (global + pairwise BH).")
+message(
+    "Finished: density contour peak plot, peak distance matrix, ",
+    "group centroids (PC1–30) + Euclidean distances, ",
+    "PERMANOVA (global + pairwise BH + donor×host interaction), ",
+    "and PERMDISP (global + per-group dispersion)."
+)
