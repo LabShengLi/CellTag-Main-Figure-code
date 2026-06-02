@@ -35,16 +35,16 @@ suppressPackageStartupMessages({
 # -------------------------------------------------------------------------
 # Output directory
 # -------------------------------------------------------------------------
-wdir <- "/project2/sli68423_1316/projects/U01_aim2/results/2026_05_17_scpa"
+wdir <- "figure4"
 dir.create(wdir, recursive = TRUE, showWarnings = FALSE)
-setwd(wdir)
 
 # -------------------------------------------------------------------------
-# Input data
+# Input data (filename only; read before setwd(wdir))
 # -------------------------------------------------------------------------
-infn2 <- "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Data_objects/CrossAge(exp2)_vivo.RDS"
+infn2 <- "CrossAge(exp2)_vivo.RDS"
 
 ss <- readRDS(infn2)
+setwd(wdir)
 ss <- subset(ss, subset = CloneID != 0)
 ss_hsc <- subset(ss, subset = celltype_final == "HSC")
 
