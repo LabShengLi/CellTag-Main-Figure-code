@@ -15,10 +15,10 @@ registerDoParallel(cores = parallel::detectCores())
 # may not needed
 
 ### Read in Raw data from 10X folders
-wdir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing'
-cellRangerDir <- "projects/U01_aim2/Cross_Expirement/CellRanger/Out/"
+wdir <- 'PreProcessing'
+cellRangerDir <- "Out/"
 
-sourceDir <- "scripts/common/"
+sourceDir <- "common/"
 source(paste0(sourceDir, "funForLoading_PK.R"))
 source(paste0(sourceDir, "data_preparation.R"))
 

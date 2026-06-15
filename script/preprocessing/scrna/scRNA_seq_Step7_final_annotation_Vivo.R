@@ -5,8 +5,8 @@ library("Seurat")
 library(ComplexHeatmap)
 library(ggplot2)
 
-wdir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing/Harmony_integration_Cutoff_1K/'
-DataDir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing/Harmony_integration_Cutoff_1K/'
+wdir <- 'Harmony_integration_Cutoff_1K/'
+DataDir <- 'Harmony_integration_Cutoff_1K/'
 
 infn <- "cross.exp.combined.vivo.hto.celltag.rds"
 

@@ -18,9 +18,9 @@ module load cellranger/9.0.1
 # --------------------- user inputs ---------------------
 ID=${1:? "Usage: sbatch this.sh <RunID>"}             # e.g., CrossExp_YO_YY
 CSV=multi_config_${ID}_ly.csv
-REF=reference/10x/refdata-gex-mm10-2020-A
-#OUTBASE=projects/U01_aim2/Cross_Expirement/CrossExpCellRangerMuli/Out
-OUTBASE=projects/U01_aim2/results/2026_02_26_cellranger_multi
+REF=refdata-gex-mm10-2020-A
+#OUTBASE=Out
+OUTBASE=2026_02_26_cellranger_multi
 # ------------------------------------------------------
 
 CPUS=${SLURM_CPUS_PER_TASK:-16}

@@ -7,8 +7,8 @@ library(ggplot2)
 library(dplyr)      # also exports %>%
 
 
-wdir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing/Harmony_integration_Cutoff_1K/'
-DataDir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing/Harmony_integration_Cutoff_1K/'
+wdir <- 'Harmony_integration_Cutoff_1K/'
+DataDir <- 'Harmony_integration_Cutoff_1K/'
 
 infn <- "cross.exp.combined.vitro.hto.celltag.rds"
 

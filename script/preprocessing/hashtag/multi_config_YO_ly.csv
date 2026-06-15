@@ -1,5 +1,5 @@
 [gene-expression]
-reference,reference/10x/refdata-gex-mm10-2020-A
+reference,refdata-gex-mm10-2020-A
 create-bam,true
 
 [feature]
@@ -7,8 +7,8 @@ reference,u01_feature_ref.csv
 
 [libraries]
 fastq_id,fastqs,feature_types
-YO_Vivo_YY_Vivo_GEX_2,raw_data/U01_aim2/cross_exp/cross_exp_gex/,Gene Expression
-YY_Vivo_11192024_1_CSP,raw_data/U01_aim2/cross_exp/L2_GEX_CSP/DeGregori_11192024_1_CSP/,Antibody Capture
+YO_Vivo_YY_Vivo_GEX_2,cross_exp_gex,Gene Expression
+YY_Vivo_11192024_1_CSP,DeGregori_11192024_1_CSP,Antibody Capture
 
 [samples]
 sample_id,hashtag_ids

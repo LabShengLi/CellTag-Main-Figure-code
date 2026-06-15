@@ -19,12 +19,12 @@ opaque <- function(color, opacity, max = 255) {
 }
 
 
-wdir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing'
+wdir <- 'PreProcessing'
 
-source("scripts/common/funForLoading_PK.R")
-source("scripts/common/data_preparation.R")
-source("scripts/common/castle.R")
-source("scripts/common/Useful_Functions.R")
+source("common/funForLoading_PK.R")
+source("common/data_preparation.R")
+source("common/castle.R")
+source("common/Useful_Functions.R")
 
 SampleList <- c("O_vitro", "OO", "OY", "Y_vitro", "YY", "YO")
 Sample <- "O_vitro"

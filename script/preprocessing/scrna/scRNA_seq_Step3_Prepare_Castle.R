@@ -16,12 +16,12 @@ opaque <- function(color, opacity, max = 255) {
 	rgb(t(col2rgb(color)), alpha = opacity, max = max)
 }
 
-wdir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing'
+wdir <- 'PreProcessing'
 
-inputData <- "from_jax/Lamis/U01_Projects/U01/Chenx/CloneTracing_project/data/publicData/Rodriguez/rawCount/"
+inputData <- "rawCount/"
 
-source("scripts/common/funForLoading_PK.R")
-source("scripts/common/data_preparation.R")
+source("common/funForLoading_PK.R")
+source("common/data_preparation.R")
 
 opt = list('inputData' = inputData,
 		   'outdir' = paste0(wdir, "/RodriguezPreparation"),

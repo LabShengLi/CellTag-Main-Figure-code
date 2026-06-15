@@ -3,9 +3,9 @@ rm(list = ls())
 
 library(EnhancedVolcano)
 
-lnWD <- 'projects/U01_aim2/Cross_Expirement/PreProcessing/'
+lnWD <- 'PreProcessing/'
 
-DataDir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing/Harmony_integration_Cutoff_1K/'
+DataDir <- 'Harmony_integration_Cutoff_1K/'
 
 RDSname <- "cross.exp.combined.vitro.hto.celltag.rds"
 
@@ -13,12 +13,12 @@ outdir <- paste0(lnWD, "biology"); dir.create(outdir, showWarnings = FALSE)
 
 library(ggplot2)
 
-source("scripts/common/funForLoading_PK.R")
-source("scripts/common/data_preparation.R")
-source("scripts/common/castle.R")
-source("scripts/common/Useful_Functions.R")
-source("scripts/common/funForSeurat.R")
-source("scripts/common/plot_figures.R")
+source("common/funForLoading_PK.R")
+source("common/data_preparation.R")
+source("common/castle.R")
+source("common/Useful_Functions.R")
+source("common/funForSeurat.R")
+source("common/plot_figures.R")
 
 ############ load Seurat object
 hspc.combined <- readRDS(paste0(DataDir, "/", RDSname))
@@ -113,11 +113,11 @@ dev.off()
 ############### cell type identification ##########
 
 ### this long list from Parveen
-markers <- read.table(file = "from_jax/Lamis/U01_Projects/U01/PK/DataTransition/markers_orderbyCT.txt", sep = "\t", header = F)
+markers <- read.table(file = "markers_orderbyCT.txt", sep = "\t", header = F)
 markers <- markers$V1
 
 ### this long list from chenx
-markers <- read.table(file = "scripts/common/markers_orderbyCT_8S.txt", sep = "\t", header = F)[, 2]
+markers <- read.table(file = "common/markers_orderbyCT_8S.txt", sep = "\t", header = F)[, 2]
 
 marker_fn <- 'chip_mouse_hsc_cell_types_v4.tsv'
 markers <- unique(read.table(file = marker_fn, sep = "\t", header = F)[, 3])

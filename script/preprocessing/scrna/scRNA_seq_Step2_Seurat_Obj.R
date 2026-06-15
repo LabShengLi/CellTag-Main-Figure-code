@@ -16,7 +16,7 @@ library(foreach)
 # register cores (use all available or set manually)
 registerDoParallel(cores = parallel::detectCores())
 
-wdir <- 'projects/U01_aim2/Cross_Expirement/PreProcessing'
+wdir <- 'PreProcessing'
 
 min.genes = 500
 min.cells = 3
@@ -30,9 +30,9 @@ setwd(wdir)
 ################## Convert Monocle processed data to Seurat Object
 RUNDoubletAgain == "YES"
 # RUNDoubletAgain=="NO"
-cellRangerDir <- "projects/U01_aim2/Cross_Expirement/CellRanger/Out"
+cellRangerDir <- "Out"
 
-sourceDir <- "scripts/common/"
+sourceDir <- "common/"
 
 source(paste0(sourceDir, "funForLoading_PK.R"))
 source(paste0(sourceDir, "data_preparation.R"))
