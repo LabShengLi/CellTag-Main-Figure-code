@@ -71,6 +71,7 @@ Key packages:
 
 | Package | Version |
 |---|---|
+| Seurat | 5.3.0 |
 | ggplot2 | 4.0.0 |
 | dplyr | 1.1.4 |
 | tidyr | 1.3.1 |
@@ -80,7 +81,6 @@ Key packages:
 | msigdbr | 25.1.1 |
 | biomaRt | 2.60.1 |
 | org.Hs.eg.db | 3.19.1 |
-| susieR | 0.14.2 |
 | pheatmap | 1.0.12 |
 | patchwork | 1.3.0 |
 
