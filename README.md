@@ -86,8 +86,8 @@ Key packages:
 
 Full session details available via `sessionInfo()`.
 
-## Data availability
+## Data and code availability
+
+Analysis code is archived on Zenodo: [10.5281/zenodo.20709794](https://doi.org/10.5281/zenodo.20709794), corresponding to release `v1.0-natsubmission` of this repository.
 
 Processed data are deposited on Zenodo: [10.5281/zenodo.20480987](https://doi.org/10.5281/zenodo.20480987).
-
-The Zenodo deposit corresponds to release `v1.0-natsubmission` of this repository.
