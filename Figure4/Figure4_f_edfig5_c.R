@@ -337,7 +337,7 @@ message(
 
 saveRDS(
     ss_hsc,
-    HSC_cell_reference_pca_seurat_bulk_transfer.RDS
+    "HSC_cell_reference_pca_seurat_bulk_transfer.RDS"
 )
 
 ref_pca_variance_out_df <- ref_pca_variance_df %>%
@@ -352,7 +352,7 @@ ref_pca_variance_out_df <- ref_pca_variance_df %>%
 
 write_tsv(
     ref_pca_variance_out_df,
-    HSC_cell_reference_PCA_variance_explained.tsv
+    "HSC_cell_reference_PCA_variance_explained.tsv"
 )
 
 cell_pca_coords_df <- tibble::rownames_to_column(
@@ -377,7 +377,7 @@ cell_pca_coords_df <- tibble::rownames_to_column(
 
 write_tsv(
     cell_pca_coords_df,
-    HSC_cell_PCA_coordinates_all_PCs_bulk_transfer.tsv
+    "HSC_cell_PCA_coordinates_all_PCs_bulk_transfer.tsv"
 )
 
 message(
@@ -927,22 +927,22 @@ pb_expr_df <- pb_expr %>%
     tibble::rownames_to_column("gene")
 
 ggsave(
-    HSC_density_contours_density_peak_PC1_PC2_PCA_all_groups.pdf,
+    "HSC_density_contours_density_peak_PC1_PC2_PCA_all_groups.pdf"
     p_peak,
     width = 5,
     height = 4
 )
 ggsave(
-    HSC_pseudobulk_replicate_PC1_PC2_PCA_bulk_transfer.pdf,
+    "HSC_pseudobulk_replicate_PC1_PC2_PCA_bulk_transfer.pdf"
     p_sample_pca,
     width = 6,
     height = 5
 )
 
-write_tsv(pca_density_peak_df, HSC_density_peak_PC1_PC2_PCA_all_groups.tsv)
+write_tsv(pca_density_peak_df,  "HSC_density_peak_PC1_PC2_PCA_all_groups.tsv")
 write_distance_matrix_tsv(
     pca_density_peak_dist_mat,
-    HSC_density_peak_PC1_PC2_euclidean_distance_matrix.tsv
+    "HSC_density_peak_PC1_PC2_euclidean_distance_matrix.tsv"
 )
 write_tsv(
     sample_plot_df %>%
@@ -950,16 +950,16 @@ write_tsv(
             mouse_id, replicate_id, orig.ident, Rep, donor, host_age,
             PC1, PC2
         ),
-    HSC_pseudobulk_replicate_PC1_PC2_coordinates_bulk_transfer.tsv
+    "HSC_pseudobulk_replicate_PC1_PC2_coordinates_bulk_transfer.tsv"
 )
 write_tsv(
     sample_pca_coords_df,
-    HSC_pseudobulk_replicate_PCA_coordinates_all_PCs_bulk_transfer.tsv
+    "HSC_pseudobulk_replicate_PCA_coordinates_all_PCs_bulk_transfer.tsv"
 )
-write_tsv(pb_expr_df, HSC_pseudobulk_expression_matrix_bulk_transfer.tsv)
+write_tsv(pb_expr_df,  "HSC_pseudobulk_expression_matrix_bulk_transfer.tsv")
 write_tsv(
     bulk_pca_variance_df,
-    HSC_pseudobulk_PCA_variance_explained_bulk_transfer.tsv
+    "HSC_pseudobulk_PCA_variance_explained_bulk_transfer.tsv"
 )
 
 message(
@@ -1181,61 +1181,61 @@ permanova_interaction_bulk_df <- tibble::as_tibble(permanova_interaction_bulk, r
 # =============================================================================
 message("=== Section 8: Write statistical tables ===")
 
-write_tsv(pca_group_centroid_df, HSC_group_centroid_PC1_30_PCA.tsv)
+write_tsv(pca_group_centroid_df,  "HSC_group_centroid_PC1_30_PCA.tsv")
 write_distance_matrix_tsv(
     pca_centroid_res$dist_mat,
-    HSC_group_centroid_PC1_30_euclidean_distance_matrix.tsv
+    "HSC_group_centroid_PC1_30_euclidean_distance_matrix.tsv"
 )
 write_tsv(
     pca_centroid_res$dist_long,
-    HSC_group_centroid_PC1_30_euclidean_distance_pairs.tsv
+    "HSC_group_centroid_PC1_30_euclidean_distance_pairs.tsv"
 )
-write_tsv(permanova_global_cell_df, HSC_PERMANOVA_global_PC_scores.tsv)
-write_tsv(permanova_global_cell_full_df, HSC_PERMANOVA_global_PC_scores_full.tsv)
-write_tsv(permanova_pairwise_cell_df, HSC_PERMANOVA_pairwise_PC_scores_BH.tsv)
-write_tsv(cell_asymmetry$asymmetry, HSC_PERMANOVA_cross_recipient_pairwise.tsv)
+write_tsv(permanova_global_cell_df,  "HSC_PERMANOVA_global_PC_scores.tsv")
+write_tsv(permanova_global_cell_full_df,  "HSC_PERMANOVA_global_PC_scores_full.tsv")
+write_tsv(permanova_pairwise_cell_df,  "HSC_PERMANOVA_pairwise_PC_scores_BH.tsv")
+write_tsv(cell_asymmetry$asymmetry,  "HSC_PERMANOVA_cross_recipient_pairwise.tsv")
 write_tsv(
     cell_asymmetry$asymmetry_summary,
-    HSC_PERMANOVA_cross_recipient_asymmetry.tsv
+    "HSC_PERMANOVA_cross_recipient_asymmetry.tsv"
 )
-write_tsv(permdisp_global_cell_df, HSC_PERMDISP_global_PC_scores.tsv)
-write_tsv(permdisp_group_cell_df, HSC_PERMDISP_group_dispersion_PC_scores.tsv)
+write_tsv(permdisp_global_cell_df,  "HSC_PERMDISP_global_PC_scores.tsv")
+write_tsv(permdisp_group_cell_df,  "HSC_PERMDISP_group_dispersion_PC_scores.tsv")
 write_tsv(
     permanova_interaction_cell_df,
-    HSC_PERMANOVA_donor_host_interaction_PC_scores.tsv
+    "HSC_PERMANOVA_donor_host_interaction_PC_scores.tsv"
 )
 
 write_tsv(
     permanova_global_bulk_df,
-    HSC_PERMANOVA_global_sample_level_PC_scores_bulk_transfer.tsv
+    "HSC_PERMANOVA_global_sample_level_PC_scores_bulk_transfer.tsv"
 )
 write_tsv(
     permanova_global_bulk_full_df,
-    HSC_PERMANOVA_global_sample_level_PC_scores_full_bulk_transfer.tsv
+    "HSC_PERMANOVA_global_sample_level_PC_scores_full_bulk_transfer.tsv"
 )
 write_tsv(
     permanova_pairwise_bulk_df,
-    HSC_PERMANOVA_pairwise_sample_level_PC_scores_BH_bulk_transfer.tsv
+    "HSC_PERMANOVA_pairwise_sample_level_PC_scores_BH_bulk_transfer.tsv"
 )
 write_tsv(
     bulk_asymmetry$asymmetry,
-    HSC_PERMANOVA_cross_recipient_pairwise_sample_level_bulk_transfer.tsv
+    "HSC_PERMANOVA_cross_recipient_pairwise_sample_level_bulk_transfer.tsv"
 )
 write_tsv(
     bulk_asymmetry$asymmetry_summary,
-    HSC_PERMANOVA_cross_recipient_asymmetry_sample_level_bulk_transfer.tsv
+    "HSC_PERMANOVA_cross_recipient_asymmetry_sample_level_bulk_transfer.tsv"
 )
 write_tsv(
     permdisp_global_bulk_df,
-    HSC_PERMDISP_global_sample_level_bulk_transfer.tsv
+    "HSC_PERMDISP_global_sample_level_bulk_transfer.tsv"
 )
 write_tsv(
     permdisp_group_bulk_df,
-    HSC_PERMDISP_group_dispersion_sample_level_bulk_transfer.tsv
+    "HSC_PERMDISP_group_dispersion_sample_level_bulk_transfer.tsv"
 )
 write_tsv(
     permanova_interaction_bulk_df,
-    HSC_PERMANOVA_donor_host_interaction_sample_level_bulk_transfer.tsv
+    "HSC_PERMANOVA_donor_host_interaction_sample_level_bulk_transfer.tsv"
 )
 
 save.image("2026_06_02_vivo_hsc_pca_cell_bulk_transfer.RData")
