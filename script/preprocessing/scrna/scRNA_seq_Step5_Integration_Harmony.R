@@ -26,7 +26,7 @@ opt <- list(
 	"num_dim_integrated" = 30, #"numeric", "Number of PCA dimension computed to analyse integrated data (40 by default)",
 	"cores" = 1, #"numeric", "Number of cores to use for ordering (for differencially expressed gene between clusters test)",
 	### I changed the resolution from 0.25 to 0.3 to produce 15 clusters
-	"resolution" = 0.25, #"numeric", "resolution for hspc.combined clustering",
+	"resolution" = 0.8, #"numeric", "resolution for hspc.combined clustering",
 	"correction" = "G2M_score+S_score+G1_score", #"character", "Covariable to use as blocking factor (eg one or several columns of pData: betch, cell cycle phases... separated by +)",
 	"logfc_threshold" = 0.25, #"numeric", "logfc threshold for finding cluster markers (1 cluster vs all deg) 0.25 by default",
 	"norm_method" = "logNorm", #"character", "normalization method, logNorm (by default) or sctransform",
@@ -311,7 +311,7 @@ ColNamesToPlot = c("seurat_clusters", "sampleName", "predicted")
 ColPaletteToPlot = list(ClusPalette, Dark.Pallette, OtherPalette)
 IdentToBatchCorrect = "sampleName"
 
-ChosenPCA = 100
+ChosenPCA = 30
 ChosenRes = 0.8
 
 print(paste0("Final Theta: ", IdentToBatchCorrect, ", Final PCA: ", ChosenPCA, ", Final ClusRes: ", ChosenRes))
