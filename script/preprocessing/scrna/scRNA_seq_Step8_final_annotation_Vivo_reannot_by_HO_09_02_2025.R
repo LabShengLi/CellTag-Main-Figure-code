@@ -9,7 +9,7 @@ library(dplyr)
 wdir <- 'Harmony_integration_Cutoff_1K/'
 DataDir <- 'Harmony_integration_Cutoff_1K/'
 
-infn <- "cross.exp.combined.vivo.hto.celltag.annotation_by_lamis_object.rds"
+infn <- "cross.exp.combined.vivo.hto.celltag.annotation_by_la_object.rds"
 
 ############ load Seurat object
 ss <- readRDS(paste0(DataDir, "/", infn))
@@ -165,7 +165,7 @@ table(ss$celltype_group)
 # Differentiated_cells
 #               1588
 
-saveRDS(ss, file = paste0(wdir, "/cross.exp.combined.vivo.hto.celltag.annotation_by_lamis_object.correct_by_HO_09_02_2025.rds"))
+saveRDS(ss, file = paste0(wdir, "/cross.exp.combined.vivo.hto.celltag.annotation_by_la_object.correct_by_HO_09_02_2025.rds"))
 
 cat("### Done \n")
 
