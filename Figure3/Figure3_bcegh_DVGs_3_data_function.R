@@ -1,12 +1,12 @@
 ###################################################################################################
 
 
-### Compute Differentially variance Genes (DVGs) in Cross(Day0), Unmanipulated and exp2 data
+### Compute Differentially variance Genes (DVGs) in Cross(Day0), wildetype, exp1 and exp2 data
 
 
 ###################################################################################################
 
-# Maintainer: Chris Chen 
+# Maintainer: Chris Chen
 # Last updated: 03/03/2026
 
 ##########################
@@ -33,39 +33,47 @@ setwd('Main_figures/Figure3/Figures/')
 
 ################################
 
-# Read in the 3 dataset 
+# Read in the 4 dataset
 
-seurat_in_vitro <- readRDS("data/CrossAge(exp2)_vitro.RDS")
-seurat_unmanipulated <- readRDS("data/Unmanipulated_vitro.rds")
-seurat_vitro_exp2 <- readRDS("data/Exp2(exp1)_vitro.RDS")
+seurat_in_vitro <- readRDS(".../Data/CrossAge(exp2)_vitro.RDS")
+
+# seurat_celltag_in_vitro <- readRDS('/project2/sli68423_1316/users/Kailiang/U1_celltag/data/seurat.vitro.cross.no_ambiguous_cloneID.rds')
+
+
+seurat_unmanipulated <- readRDS('.../Data/Unmanipulated_vitro.rds')
+
+# seurat_vitro_exp1 <- readRDS('/project2/sli68423_1316/users-sync/lamis/U01_Projects/AllExpDownStream/hspc.combined.vitro.ann.exp1.RDS')
+
+seurat_vitro_exp2 <- readRDS('.../Data/Exp2(exp1)_vitro.RDS')
 
 # inspect data
 
 table(seurat_in_vitro$sampleName) # O_vitro: 6337 ; Y_vitro: 10971
-seurat_unmanipulated  # 18046 genes and 48140 cells 
+seurat_unmanipulated  # 18046 genes and 48140 cells
 table(seurat_unmanipulated$AGE) # mid: 10877 ; old:11966 ; vold:12604 ; young: 12693
-seurat_vitro_exp2 # 16611 genes and 55499 cells 
+seurat_vitro_exp1 # 18389 genes and 28386 cells
+seurat_vitro_exp2 # 16611 genes and 55499 cells
 
 ############################################
 
-## Here we have two types of function for each of the DVGs analysis 
+## Here we have two types of function for each of the DVGs analysis
 
-# 1. Compute differential variance gene function 
-# 2. Plot boxplot and volcano plot function 
-
-############################################
-
-# Prepare input data 
+# 1. Compute differential variance gene function
+# 2. Plot boxplot and volcano plot function
 
 ############################################
 
-# Create a function to remove unrelated/technical genes 
+# Prepare input data
+
+############################################
+
+# Create a function to remove unrelated/technical genes
 # ------------------------------------------------
 # Remove unrelated / technical genes
 # ------------------------------------------------
 
 filter_unrelated_genes <- function(seurat_obj){
-  all_genes <- rownames(seurat_obj) 
+  all_genes <- rownames(seurat_obj)
   genes_filtered <- all_genes[
     !grepl("^mt-", all_genes, ignore.case = TRUE) &
       !grepl("^Rps", all_genes) &
@@ -80,7 +88,7 @@ filter_unrelated_genes <- function(seurat_obj){
 
 #######################
 
-## Cross Day0 DVGs 
+## Cross Day0 DVGs
 
 #######################
 
@@ -92,7 +100,7 @@ table(seurat_in_vitro$celltype)
 seurat_in_vitro_HSC <- subset(seurat_in_vitro,subset = celltype %in% c("LT-HSC"))
 # Check the counts
 table(seurat_in_vitro_HSC$celltype) # HSC: 9421
-seurat_in_vitro_HSC # 33270 genes and 9421 cells 
+seurat_in_vitro_HSC # 33270 genes and 9421 cells
 DefaultAssay(seurat_in_vitro_HSC) <- "RNA"
 seurat_in_vitro_HSC$donor_age <- ifelse(grepl("^O", seurat_in_vitro_HSC$sampleName), "O", "Y")
 seurat_in_vitro_HSC$donor_age <- factor(seurat_in_vitro_HSC$donor_age, levels = c("Y", "O"))
@@ -101,10 +109,10 @@ table(seurat_in_vitro_HSC$donor_age) # Young: 5040; Old: 4381
 
 # Remove unrelated genes (technical)
 all_genes <- rownames(seurat_in_vitro_HSC)
-genes_filtered <- all_genes[!grepl("^mt-", all_genes, ignore.case = TRUE) &!grepl("^Rps", all_genes) & 
-                            !grepl("^Rpl", all_genes) & !grepl("^Hist", all_genes) & !grepl("^Gm[0-9]", all_genes) & !grepl("Rik$", all_genes)]
+genes_filtered <- all_genes[!grepl("^mt-", all_genes, ignore.case = TRUE) &!grepl("^Rps", all_genes) &
+                              !grepl("^Rpl", all_genes) & !grepl("^Hist", all_genes) & !grepl("^Gm[0-9]", all_genes) & !grepl("Rik$", all_genes)]
 length(all_genes)
-length(genes_filtered) # 13366 genes 
+length(genes_filtered) # 13366 genes
 seurat_in_vitro_HSC <- subset(seurat_in_vitro_HSC,features = genes_filtered)
 seurat_in_vitro_HSC # 26732 genes and 9421 cells
 seurat_in_vitro_HSC <- filter_unrelated_genes(seurat_in_vitro_HSC)
@@ -173,7 +181,46 @@ compute_variance_and_cv <- function(
   keep_genes <- names(which(detect_pct >= min_pct & mean_expr >= min_mean))
   expr <- expr[keep_genes, , drop = FALSE]
   message("Keeping ", length(keep_genes), " genes after filtering.")
-  # ---------------- Variance tests ----------------
+  
+  idx_g1 <- which(group_factor == g1)
+  idx_g2 <- which(group_factor == g2)
+  
+  # ---------------- Mean-variance trend (fit BEFORE testing) ----------------
+  mean_g1 <- Matrix::rowMeans(expr[, idx_g1, drop = FALSE])
+  mean_g2 <- Matrix::rowMeans(expr[, idx_g2, drop = FALSE])
+  var_g1_raw <- apply(expr[, idx_g1, drop = FALSE], 1, var)
+  var_g2_raw <- apply(expr[, idx_g2, drop = FALSE], 1, var)
+  
+  trend_df <- data.frame(
+    mean = c(mean_g1, mean_g2),
+    var  = c(var_g1_raw, var_g2_raw)
+  )
+  trend_df <- trend_df[
+    !is.na(trend_df$mean) & trend_df$mean > 0 &
+      !is.na(trend_df$var)  & trend_df$var  > 0,
+  ]
+  
+  fit_loess <- loess(log10(var) ~ log10(mean), data = trend_df, span = 0.75,
+                     control = loess.control(surface = "direct"))
+  
+  expected_var <- function(mean_vec) {
+    out <- rep(NA_real_, length(mean_vec))
+    ok <- !is.na(mean_vec) & mean_vec > 0
+    out[ok] <- 10 ^ predict(fit_loess, newdata = data.frame(mean = mean_vec[ok]))
+    out
+  }
+  
+  scale_g1 <- sqrt(expected_var(mean_g1))
+  scale_g2 <- sqrt(expected_var(mean_g2))
+  testable <- !is.na(scale_g1) & !is.na(scale_g2) & scale_g1 > 0 & scale_g2 > 0
+  
+  adj_expr <- expr
+  adj_expr[, idx_g1] <- expr[, idx_g1, drop = FALSE] / scale_g1
+  adj_expr[, idx_g2] <- expr[, idx_g2, drop = FALSE] / scale_g2
+  
+  message(sum(!testable), " gene(s) excluded: mean-variance trend not evaluable.")
+  
+  # ---------------- Variance tests (run on trend-adjusted expression) ----------------
   do_tests <- function(x, group_factor) {
     res <- list(bf = NA, lev = NA, bart = NA)
     df <- data.frame(expr = x, grp = group_factor)
@@ -197,20 +244,21 @@ compute_variance_and_cv <- function(
   }
   message("Running variance tests ...")
   handlers(global = TRUE)
-  chunks <- split(rownames(expr),
-                  ceiling(seq_along(rownames(expr)) / chunk_size))
+  test_genes <- rownames(expr)[testable]
+  chunks <- split(test_genes, ceiling(seq_along(test_genes) / chunk_size))
   results_list <- list()
   with_progress({
     p <- progressor(steps = length(chunks))
     for (i in seq_along(chunks)) {
       p(sprintf("Chunk %d / %d", i, length(chunks)))
       genes <- chunks[[i]]
-      sub_expr <- expr[genes, , drop = FALSE]
-      mat <- apply(sub_expr, 1, do_tests, group_factor = group_factor)
+      sub_adj <- adj_expr[genes, , drop = FALSE]
+      sub_raw <- expr[genes, , drop = FALSE]
+      mat <- apply(sub_adj, 1, do_tests, group_factor = group_factor)
       bf_p   <- sapply(mat, `[[`, "bf")
       lev_p  <- sapply(mat, `[[`, "lev")
       bart_p <- sapply(mat, `[[`, "bart")
-      var_tbl <- apply(sub_expr, 1, function(x) {
+      var_tbl <- apply(sub_raw, 1, function(x) {
         df <- data.frame(expr = x, grp = group_factor)
         var_g1 <- var(df$expr[df$grp == g1], na.rm = TRUE)
         var_g2 <- var(df$expr[df$grp == g2], na.rm = TRUE)
@@ -240,34 +288,15 @@ compute_variance_and_cv <- function(
       fdr_levene = p.adjust(p_levene, "BH"),
       fdr_bartlett = p.adjust(p_bartlett, "BH")
     )
-  # ---------------- Mean-adjusted variance ----------------
+  # ---------------- Mean-adjusted variance (from the same adjusted values used for testing) ----------------
   message("Computing mean-adjusted variance and SD ...")
-  mean_g1 <- apply(expr[, group_factor == g1], 1, mean, na.rm = TRUE)
-  mean_g2 <- apply(expr[, group_factor == g2], 1, mean, na.rm = TRUE)
-  mean_var_df <- data.frame(
-    gene = rownames(expr),
-    group = rep(c(g1, g2), each = nrow(expr)),
-    mean = c(mean_g1, mean_g2),
-    var = c(
-      var_results[[paste0("var_", g1)]],
-      var_results[[paste0("var_", g2)]]
-    )
-  )
-  mean_var_df <- mean_var_df %>%
-    filter(!is.na(mean) & mean > 0 & !is.na(var) & var > 0)
-  fit_loess <- loess(log10(var) ~ log10(mean),
-                     data = mean_var_df,
-                     span = 0.75)
-  mean_var_df$expected_logVar <- predict(fit_loess, newdata = mean_var_df)
-  mean_var_df$residual_logVar <- log10(mean_var_df$var) -
-    mean_var_df$expected_logVar
-  mean_var_df$mean_adjusted_var <- 10 ^ mean_var_df$residual_logVar
-  mean_var_df$mean_adjusted_sd  <- sqrt(mean_var_df$mean_adjusted_var)
-  adj_tbl <- mean_var_df %>%
-    dplyr::select(gene, group, mean_adjusted_var, mean_adjusted_sd) %>%
-    pivot_wider(names_from = group,
-                values_from = c(mean_adjusted_var,
-                                mean_adjusted_sd))
+  mean_adjusted_var_g1 <- apply(adj_expr[, idx_g1, drop = FALSE], 1, var, na.rm = TRUE)
+  mean_adjusted_var_g2 <- apply(adj_expr[, idx_g2, drop = FALSE], 1, var, na.rm = TRUE)
+  adj_tbl <- data.frame(gene = rownames(expr))
+  adj_tbl[[paste0("mean_adjusted_var_", g1)]] <- mean_adjusted_var_g1
+  adj_tbl[[paste0("mean_adjusted_var_", g2)]] <- mean_adjusted_var_g2
+  adj_tbl[[paste0("mean_adjusted_sd_", g1)]]  <- sqrt(mean_adjusted_var_g1)
+  adj_tbl[[paste0("mean_adjusted_sd_", g2)]]  <- sqrt(mean_adjusted_var_g2)
   adj_tbl <- adj_tbl %>%
     mutate(
       log2FC_mean_adjusted_variance =
@@ -302,7 +331,7 @@ compute_variance_and_cv <- function(
   return(merged)
 }
 
-#### Run the function for Day0 YvsO DVGs #### 
+#### Run the function for Day0 YvsO DVGs ####
 
 Day0_hsc_dvgs_results <- compute_variance_and_cv(
   seu = seurat_in_vitro_HSC,
@@ -312,12 +341,12 @@ Day0_hsc_dvgs_results <- compute_variance_and_cv(
   n_hvg = 2000,
   min_pct = 0.1,
   min_mean = 0.1
-) # 789 genes after filtering 
+) # 789 genes after filtering
 
 View(Day0_hsc_dvgs_results)
 
-# save the Crossage Day0 DVGs table 
-write.xlsx(Day0_hsc_dvgs_results,file = "/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Figure3/Tables/Cross_vitro_HSC_DVG_results.xlsx",rowNames = FALSE)
+# save the Crossage Day0 DVGs table
+write.xlsx(Day0_hsc_dvgs_results,file = ".../Cross_vitro_HSC_DVG_results.xlsx",rowNames = FALSE)
 
 #########
 
@@ -456,7 +485,7 @@ plot_variance_cv_summaries <- function(
                 annotations = get_wilcox_label(p_mv),
                 y_position = max(long_mvar$MeanAdjustedVar, na.rm = TRUE) * 1.05) +
     scale_color_manual(values = color_palette) +
-    scale_fill_manual(values = color_palette) + 
+    scale_fill_manual(values = color_palette) +
     theme_classic(base_size = 18) +
     theme(
       axis.line = element_line(color = "black", linewidth = 1),
@@ -487,7 +516,7 @@ plot_variance_cv_summaries <- function(
          y = "Density")
   
   # ==========================================================
-  # Density Plot
+  # Density Plot (Significant Genes Only)
   # ==========================================================
   
   df_sig <- df %>%
@@ -568,13 +597,13 @@ plot_variance_cv_summaries <- function(
   # Top genes increased in g2
   top_up_g2 <- df_vol_mvar %>%
     filter(significance == paste0("↑", g2)) %>%
-    arrange(.data[[fdr_col]], desc(.data[[fc_col]])) %>%   
+    arrange(.data[[fdr_col]], desc(.data[[fc_col]])) %>%   # significance first
     slice_head(n = 10)
   
   # Top genes increased in g1
   top_up_g1 <- df_vol_mvar %>%
     filter(significance == paste0("↑", g1)) %>%
-    arrange(.data[[fdr_col]], .data[[fc_col]]) %>%         
+    arrange(.data[[fdr_col]], .data[[fc_col]]) %>%         # significance first
     slice_head(n = 10)
   
   top_genes_mvar <- bind_rows(top_up_g2, top_up_g1) %>%
@@ -593,7 +622,6 @@ plot_variance_cv_summaries <- function(
   y_min <- sig_line - 10
   y_max <- max(df_vol_mvar$neg_log10_fdr, na.rm = TRUE)
   
-
   p_volcano_mvar <- ggplot(df_vol_mvar,
                            aes(x = .data[[fc_col]],
                                y = neg_log10_fdr)) +
@@ -603,7 +631,7 @@ plot_variance_cv_summaries <- function(
     geom_text_repel(
       data = top_genes_mvar,
       aes(label = gene),
-      parse = TRUE, 
+      parse = TRUE,
       size = 5,
       color = "black",
       max.overlaps = Inf,
@@ -650,7 +678,7 @@ plot_variance_cv_summaries <- function(
   
   top_up_g2_var <- df_vol_var %>%
     filter(significance_var == paste0("↑", g2)) %>%
-    arrange(.data[[fdr_col]], desc(.data[[fc_col]])) %>% 
+    arrange(.data[[fdr_col]], desc(.data[[fc_col]])) %>%
     slice_head(n = 10)
   
   top_up_g1_var <- df_vol_var %>%
@@ -679,7 +707,7 @@ plot_variance_cv_summaries <- function(
     geom_text_repel(
       data = top_genes_var,
       aes(label = gene),
-      parse = TRUE, 
+      parse = TRUE,
       size = 5,
       color = "black",
       max.overlaps = Inf,
@@ -775,7 +803,8 @@ compute_variance_and_cv_multigroup_with_mean_adjustment <- function(
     ordered = TRUE
   )
   age <- seu[[group_col]][, 1]
-  message("Age levels detected: ", paste(levels(age), collapse = ", "))
+  age_levels <- levels(age)
+  message("Age levels detected: ", paste(age_levels, collapse = ", "))
   # --- HVGs ---
   hvgs <- VariableFeatures(seu)
   if (length(hvgs) == 0) {
@@ -793,7 +822,44 @@ compute_variance_and_cv_multigroup_with_mean_adjustment <- function(
   keep_genes <- names(which(detect_pct >= min_pct & mean_expr >= min_mean))
   expr <- expr[keep_genes, , drop = FALSE]
   message("Keeping ", length(keep_genes), " genes after filtering.")
-  # --- Variance tests (Brown–Forsythe, Levene, Bartlett) ---
+  
+  idx_by_group <- lapply(age_levels, function(g) which(age == g))
+  names(idx_by_group) <- age_levels
+  
+  # ---------------- Mean-variance trend (fit BEFORE testing) ----------------
+  mean_by_group <- lapply(idx_by_group, function(idx) Matrix::rowMeans(expr[, idx, drop = FALSE]))
+  var_by_group  <- lapply(idx_by_group, function(idx) apply(expr[, idx, drop = FALSE], 1, var))
+  
+  trend_df <- data.frame(
+    mean = unlist(mean_by_group),
+    var  = unlist(var_by_group)
+  )
+  trend_df <- trend_df[
+    !is.na(trend_df$mean) & trend_df$mean > 0 &
+      !is.na(trend_df$var)  & trend_df$var  > 0,
+  ]
+  
+  fit_loess <- loess(log10(var) ~ log10(mean), data = trend_df, span = 0.75,
+                     control = loess.control(surface = "direct"))
+  
+  expected_var <- function(mean_vec) {
+    out <- rep(NA_real_, length(mean_vec))
+    ok <- !is.na(mean_vec) & mean_vec > 0
+    out[ok] <- 10 ^ predict(fit_loess, newdata = data.frame(mean = mean_vec[ok]))
+    out
+  }
+  
+  scale_by_group <- lapply(mean_by_group, function(m) sqrt(expected_var(m)))
+  testable <- Reduce(`&`, lapply(scale_by_group, function(s) !is.na(s) & s > 0))
+  
+  adj_expr <- expr
+  for (g in age_levels) {
+    adj_expr[, idx_by_group[[g]]] <- expr[, idx_by_group[[g]], drop = FALSE] / scale_by_group[[g]]
+  }
+  
+  message(sum(!testable), " gene(s) excluded: mean-variance trend not evaluable.")
+  
+  # --- Variance tests (Brown–Forsythe, Levene, Bartlett), run on trend-adjusted expression ---
   handlers(global = TRUE)
   message("Running variance tests ...")
   do_tests <- function(x, age) {
@@ -819,15 +885,16 @@ compute_variance_and_cv_multigroup_with_mean_adjustment <- function(
     res
   }
   # Chunking for memory efficiency
-  chunks <- split(rownames(expr), ceiling(seq_along(rownames(expr)) / chunk_size))
+  test_genes <- rownames(expr)[testable]
+  chunks <- split(test_genes, ceiling(seq_along(test_genes) / chunk_size))
   results_list <- list()
   with_progress({
     p <- progressor(steps = length(chunks))
     for (i in seq_along(chunks)) {
       p(sprintf("Chunk %d / %d", i, length(chunks)))
       genes <- chunks[[i]]
-      sub_expr <- expr[genes, , drop = FALSE]
-      mat <- apply(sub_expr, 1, do_tests, age = age)
+      sub_adj <- adj_expr[genes, , drop = FALSE]
+      mat <- apply(sub_adj, 1, do_tests, age = age)
       bf_p   <- sapply(mat, `[[`, "bf")
       lev_p  <- sapply(mat, `[[`, "lev")
       bart_p <- sapply(mat, `[[`, "bart")
@@ -861,29 +928,16 @@ compute_variance_and_cv_multigroup_with_mean_adjustment <- function(
     var_tbl,
     cv_tbl
   )
-  # --- Mean–variance adjustment ---
-  long_stats <- gene_stats %>%
-    pivot_longer(cols = starts_with("var_"), names_to = "var_group", values_to = "var") %>%
-    mutate(mean = rep(as.numeric(t(mean_tbl)), each = 1)) %>%
-    mutate(log_mean = log10(mean + 1e-8), log_var = log10(var + 1e-8)) %>%
-    filter(is.finite(log_mean) & is.finite(log_var))
-  fit_loess <- loess(log_var ~ log_mean, data = long_stats, span = 0.75)
-  pred <- predict(fit_loess, newdata = long_stats$log_mean)
-  long_stats$residual_logVar <- long_stats$log_var - pred
-  long_stats$residual_SD <- sqrt(10 ^ long_stats$residual_logVar)
-  resid_summary <- long_stats %>%
-    mutate(group = sub("var_", "", var_group)) %>%
-    group_by(gene, group) %>%
-    summarise(
-      mean_adjusted_var = mean(10 ^ residual_logVar),
-      mean_adjusted_sd  = mean(residual_SD),
-      .groups = "drop"
-    ) %>%
-    pivot_wider(
-      names_from = group,
-      values_from = c(mean_adjusted_var, mean_adjusted_sd),
-      names_glue = "{.value}_{group}"
-    )
+  # --- Mean-adjusted variance (from the same adjusted expression used for testing) ---
+  mean_adjusted_var <- lapply(age_levels, function(g) {
+    apply(adj_expr[, idx_by_group[[g]], drop = FALSE], 1, var, na.rm = TRUE)
+  })
+  names(mean_adjusted_var) <- age_levels
+  resid_summary <- data.frame(gene = rownames(expr))
+  for (g in age_levels) {
+    resid_summary[[paste0("mean_adjusted_var_", g)]] <- mean_adjusted_var[[g]]
+    resid_summary[[paste0("mean_adjusted_sd_", g)]]  <- sqrt(mean_adjusted_var[[g]])
+  }
   # --- Merge all ---
   merged <- gene_stats %>%
     left_join(resid_summary, by = "gene") %>%
@@ -1155,7 +1209,7 @@ table(seurat_unmanipulated$AGE)
 table(seurat_unmanipulated$celltype)
 seurat_unmanipulated_HSC <- subset(seurat_unmanipulated,subset = celltype == c("LT-HSC","ST-HSC"))
 seurat_unmanipulated_HSC <- filter_unrelated_genes(seurat_unmanipulated_HSC) # filter out unrelated/ technical genes
-seurat_unmanipulated_HSC # 14323 genes and 2797 cells 
+seurat_unmanipulated_HSC # 14323 genes and 2797 cells
 table(seurat_unmanipulated_HSC$celltype)
 table(seurat_unmanipulated_HSC$AGE)
 
@@ -1169,7 +1223,7 @@ unmanipulated_results <- compute_variance_and_cv_multigroup_with_mean_adjustment
   slot = "data",
   min_pct = 0.1,
   min_mean = 0.1
-) # 687 genes 
+) # 687 genes
 
 plots_unmanipulated <- plot_variance_cv_summaries_multigroup_with_mean_adjustment(
   df = unmanipulated_results,
@@ -1293,7 +1347,7 @@ p_null <- ggplot(df_plot, aes(x = perm_diffs)) +
   theme_classic(base_size = 16) +
   labs(
     title = "Null Distribution of Old–Young Variance Difference\n(Random 100 Genes per Iteration)",
-    subtitle = sprintf("Observed mean diff (red) = %.4f | Empirical p = %.4g", 
+    subtitle = sprintf("Observed mean diff (red) = %.4f | Empirical p = %.4g",
                        obs_mean_diff, emp_p),
     x = "Mean(Old − Young) variance difference",
     y = "Count"
@@ -1378,7 +1432,7 @@ base_plot <- function(df) {
       y = "Mean-Adj Var"
     )
 }
-# observed 
+# observed
 p_cond1 <- base_plot(
   subset(plot_df, condition == unique(plot_df$condition)[1])
 )
@@ -1415,21 +1469,21 @@ perm_delta <- map_dfr(1:n_perm, function(i) {
 })
 delta_plot_df <- bind_rows(obs_delta, perm_delta) %>%
   mutate(condition = factor(condition, levels = c("Obs", "Ran")))
-delta_plot_df 
+delta_plot_df
 
 p_delta <- ggplot(
   delta_plot_df,
   aes(x = condition, y = delta, color = condition)
 ) +
   geom_boxplot(
-    width = 0.55,         
+    width = 0.55,
     fill = "white",
     outlier.shape = NA,
     linewidth = 1
   ) +
   geom_jitter(
     aes(fill = condition),
-    width = 0.12,         
+    width = 0.12,
     alpha = 0.8,
     size = 3,
     shape = 21,
@@ -1463,7 +1517,7 @@ p_delta <- ggplot(
     plot.margin  = margin(6, 6, 6, 6),
     plot.title   = element_text(size = 22, hjust = 0.5),
     strip.text   = element_text(size = 16),
-    legend.position = "none"  
+    legend.position = "none"
   )
 p_delta
 
@@ -1488,14 +1542,336 @@ p2 <- p_delta + facet_wrap(~"Randomized") +
 p_combined <- p1 + p2 + plot_layout(ncol = 2)
 p_combined
 
+########################################
+
+## Exp1 DVGs
+
+########################################
+
+# reconstruct the function for computing variance and CV for exp1 data
+
+compute_variance_and_cv_YO_pairs_exp1 <- function(
+    seu,
+    assay = "RNA",
+    slot = "data",
+    group_col = "sampleName",
+    n_hvg = 2000,
+    selection.method = "vst",
+    min_pct = 0.1,
+    min_mean = 0.1
+) {
+  suppressPackageStartupMessages({
+    library(Seurat); library(dplyr); library(tidyr)
+    library(purrr);  library(car)
+  })
+  # --- Metadata alignment ---
+  if (!identical(colnames(seu), rownames(seu@meta.data))) {
+    seu@meta.data <- seu@meta.data[colnames(seu), , drop = FALSE]
+  }
+  stopifnot(group_col %in% colnames(seu@meta.data))
+  desired_levels <- c("Y2","O2","Y3","O3","Y4","O4")
+  seu@meta.data[[group_col]] <- factor(seu@meta.data[[group_col]],
+                                       levels = desired_levels, ordered = TRUE)
+  meta <- seu@meta.data
+  meta$YO_group <- ifelse(grepl("^Y", meta[[group_col]]), "Y", "O")
+  message("Groups detected: ", paste(desired_levels, collapse = ", "))
+  print(table(meta$YO_group))
+  # --- HVGs ---
+  hvgs <- VariableFeatures(seu)
+  if (length(hvgs) == 0) {
+    seu <- FindVariableFeatures(seu, assay = assay,
+                                selection.method = selection.method,
+                                nfeatures = n_hvg)
+    hvgs <- VariableFeatures(seu)
+  } else if (length(hvgs) > n_hvg) hvgs <- hvgs[1:n_hvg]
+  # --- Expression matrix ---
+  expr <- tryCatch(GetAssayData(seu, assay = assay, layer = slot),
+                   error = function(e) GetAssayData(seu, assay = assay, slot = slot))
+  expr <- expr[intersect(rownames(expr), hvgs), , drop = FALSE]
+  # --- Filter genes ---
+  keep <- names(which(Matrix::rowMeans(expr > 0) >= min_pct &
+                        Matrix::rowMeans(expr)    >= min_mean))
+  expr <- expr[keep, , drop = FALSE]
+  message("Keeping ", length(keep), " genes after filtering.")
+  
+  idx_by_group <- lapply(desired_levels, function(g) which(meta[[group_col]] == g))
+  names(idx_by_group) <- desired_levels
+  
+  # --- Mean & variance per fine-grained group ---
+  mean_by_group <- lapply(idx_by_group, function(idx) Matrix::rowMeans(expr[, idx, drop = FALSE]))
+  var_by_group  <- lapply(idx_by_group, function(idx) apply(expr[, idx, drop = FALSE], 1, var))
+  mean_tbl <- as.data.frame(mean_by_group); colnames(mean_tbl) <- paste0("mean_", desired_levels)
+  var_tbl  <- as.data.frame(var_by_group);  colnames(var_tbl)  <- paste0("var_",  desired_levels)
+  gene_stats <- bind_cols(gene = rownames(expr), mean_tbl, var_tbl)
+  
+  # --- Mean–variance trend (fit BEFORE testing, bias-stabilized LOESS on 5-95% quantile range) ---
+  trend_df <- data.frame(
+    mean = unlist(mean_by_group),
+    var  = unlist(var_by_group)
+  ) %>%
+    mutate(log_mean = log10(pmax(mean, 1e-3)), log_var = log10(pmax(var, 1e-4))) %>%
+    filter(is.finite(log_mean), is.finite(log_var))
+  
+  fit_loess <- loess(log_var ~ log_mean,
+                     data = trend_df %>%
+                       filter(between(log_mean,
+                                      quantile(log_mean, 0.05, na.rm = TRUE),
+                                      quantile(log_mean, 0.95, na.rm = TRUE))),
+                     span = 0.75)
+  
+  expected_logvar <- function(mean_vec) {
+    log_mean_vec <- log10(pmax(mean_vec, 1e-3))
+    pred <- predict(fit_loess, newdata = data.frame(log_mean = log_mean_vec))
+    if (anyNA(pred)) {
+      range_fit <- range(fit_loess$x, na.rm = TRUE)
+      low_val  <- predict(fit_loess, newdata = data.frame(log_mean = range_fit[1]))
+      high_val <- predict(fit_loess, newdata = data.frame(log_mean = range_fit[2]))
+      pred[log_mean_vec < range_fit[1]] <- low_val
+      pred[log_mean_vec > range_fit[2]] <- high_val
+    }
+    pred
+  }
+  
+  scale_by_group <- lapply(mean_by_group, function(m) sqrt(10 ^ expected_logvar(m)))
+  
+  adj_expr <- expr
+  for (g in desired_levels) {
+    adj_expr[, idx_by_group[[g]]] <- expr[, idx_by_group[[g]], drop = FALSE] / scale_by_group[[g]]
+  }
+  
+  # --- Mean-adjusted variance per fine-grained group (from the same adjusted values used for testing) ---
+  mean_adjusted_var <- lapply(desired_levels, function(g) {
+    apply(adj_expr[, idx_by_group[[g]], drop = FALSE], 1, var, na.rm = TRUE)
+  })
+  names(mean_adjusted_var) <- desired_levels
+  resid_summary <- data.frame(gene = rownames(expr))
+  for (g in desired_levels) {
+    resid_summary[[paste0("mean_adjusted_var_", g)]] <- mean_adjusted_var[[g]]
+  }
+  
+  # --- Combine into Y vs O aggregates ---
+  combined_meanadj <- tibble(
+    gene = resid_summary$gene,
+    mean_adjusted_var_Y = rowMeans(select(resid_summary, starts_with("mean_adjusted_var_Y")), na.rm = TRUE),
+    mean_adjusted_var_O = rowMeans(select(resid_summary, starts_with("mean_adjusted_var_O")), na.rm = TRUE)
+  ) %>%
+    mutate(log2FC_mean_adjusted_var_YO_combined =
+             log2((mean_adjusted_var_O + 1e-8)/(mean_adjusted_var_Y + 1e-8)))
+  
+  # --- Brown–Forsythe / Levene / Bartlett tests (Y vs O), run on trend-adjusted expression ---
+  message(" Running variance tests (Y vs O)...")
+  run_tests_YO <- function(g) {
+    df_test <- data.frame(val = adj_expr[g, ], grp = meta$YO_group)
+    df_test <- df_test[!is.na(df_test$val), ]
+    if (length(unique(df_test$grp)) < 2) return(c(NA, NA, NA))
+    bf  <- tryCatch(car::leveneTest(val ~ grp, data = df_test, center = "median")[1,"Pr(>F)"], error = function(e) NA)
+    lev <- tryCatch(car::leveneTest(val ~ grp, data = df_test, center = "mean")[1,"Pr(>F)"],   error = function(e) NA)
+    bart<- tryCatch(bartlett.test(val ~ grp, data = df_test)$p.value,                           error = function(e) NA)
+    c(bf, lev, bart)
+  }
+  combined_test <- map_dfr(rownames(expr), function(g){
+    r <- run_tests_YO(g)
+    tibble(gene = g,
+           p_brown_forsythe_YO_combined = r[1],
+           p_levene_YO_combined         = r[2],
+           p_bartlett_YO_combined       = r[3])
+  }) %>%
+    mutate(
+      fdr_brown_forsythe_YO_combined = p.adjust(p_brown_forsythe_YO_combined, "BH"),
+      fdr_levene_YO_combined         = p.adjust(p_levene_YO_combined, "BH"),
+      fdr_bartlett_YO_combined       = p.adjust(p_bartlett_YO_combined, "BH")
+    )
+  # --- Merge & direction check ---
+  merged <- gene_stats %>%
+    left_join(resid_summary,   by = "gene") %>%
+    left_join(combined_meanadj,by = "gene") %>%
+    left_join(combined_test,   by = "gene")
+  dir_check <- mean(sign(merged$mean_adjusted_var_O - merged$mean_adjusted_var_Y) ==
+                      sign(merged$log2FC_mean_adjusted_var_YO_combined), na.rm = TRUE)
+  message(sprintf("Direction consistency: %.1f%% genes match expected O/Y direction", dir_check * 100))
+  
+  message("Completed Exp1 Y–O variance computation (bias-stabilized, safe extrapolation).")
+  return(merged)
+}
+
+######
+
+# Plot function
+
+plot_variance_cv_summaries_exp1 <- function(
+    df,
+    fdr_col = "fdr_brown_forsythe_YO_combined",
+    fdr_cutoff = 0.05,
+    fc_cutoff = 0.25,
+    color_palette = c("#1B4F72", "#922B21", "#21618C", "#9B59B6", "#7D3C98", "#BA4A00"),
+    prefix = "Exp1 (Y–O Comparison)"
+) {
+  suppressPackageStartupMessages({
+    library(ggplot2); library(dplyr); library(tidyr)
+    library(ggrepel); library(ggsignif)
+  })
+  age_levels <- c("Y2", "O2", "Y3", "O3", "Y4", "O4")
+  n_genes <- nrow(df)
+  # --- All Y–O pair boxplots ---
+  long_adjvar <- df %>%
+    select(gene, starts_with("mean_adjusted_var_")) %>%
+    pivot_longer(-gene, names_to = "Group", values_to = "MeanAdjVar") %>%
+    mutate(Group = sub("mean_adjusted_var_", "", Group)) %>%
+    filter(Group %in% age_levels, !is.na(MeanAdjVar))
+  pairwise_comparisons <- list(c("Y2", "O2"), c("Y3", "O3"), c("Y4", "O4"))
+  p_vals <- sapply(pairwise_comparisons, function(p)
+    wilcox.test(df[[paste0("mean_adjusted_var_", p[1])]],
+                df[[paste0("mean_adjusted_var_", p[2])]])$p.value)
+  p_mean <- mean(p_vals, na.rm = TRUE)
+  p_meanadjvar <- ggplot(long_adjvar, aes(x = Group, y = MeanAdjVar, color = Group)) +
+    geom_boxplot(outlier.shape = NA, fill = NA, linewidth = 1) +
+    geom_jitter(width = 0.15, alpha = 0.6, size = 1.8) +
+    geom_signif(comparisons = pairwise_comparisons, test = "wilcox.test",
+                step_increase = 0.12, textsize = 3.8) +
+    scale_color_manual(values = color_palette) +
+    theme_classic(base_size = 17) +
+    theme(
+      axis.title = element_text(face = "bold"),
+      plot.title = element_text(face = "bold"),
+      legend.position = "none"
+    ) +
+    labs(
+      title = sprintf("%s: Mean-Adjusted Variance (All Y–O Pairs)", prefix),
+      subtitle = sprintf("Mean Wilcoxon p = %.2e | n = %d genes", p_mean, n_genes),
+      y = "Mean-Adjusted Variance"
+    )
+  # --- Combined Y vs O ---
+  df_combined <- df %>%
+    transmute(gene,
+              `Y (Combined)` = rowMeans(select(., starts_with("mean_adjusted_var_Y")), na.rm = TRUE),
+              `O (Combined)` = rowMeans(select(., starts_with("mean_adjusted_var_O")), na.rm = TRUE)) %>%
+    pivot_longer(-gene, names_to = "Group", values_to = "MeanAdjVar") %>%
+    mutate(Group = factor(Group, levels = c("Y (Combined)", "O (Combined)")))
+  p_combined <- wilcox.test(MeanAdjVar ~ Group, data = df_combined, exact = FALSE)$p.value
+  p_combined_box <- ggplot(df_combined, aes(x = Group, y = MeanAdjVar, color = Group)) +
+    geom_boxplot(outlier.shape = NA, fill = "white", linewidth = 1.1) +
+    geom_jitter(width = 0.15, alpha = 0.6, size = 1.8) +
+    geom_signif(
+      comparisons = list(c("Y (Combined)", "O (Combined)")),
+      annotations = sprintf("p=%.2e", p_combined),
+      y_position = max(df_combined$MeanAdjVar, na.rm = TRUE) * 1.05
+    ) +
+    scale_color_manual(values = c("Y (Combined)"="#1F618D", "O (Combined)"="#B03A2E")) +
+    theme_classic(base_size = 17) +
+    theme(
+      axis.title = element_text(face = "bold"),
+      plot.title = element_text(face = "bold"),
+      legend.position = "none"
+    ) +
+    labs(
+      title = sprintf("%s: Combined Y vs O Mean-Adjusted Variance", prefix),
+      subtitle = sprintf("Wilcoxon p = %.2e | n = %d genes", p_combined, n_genes),
+      y = "Mean-Adjusted Variance"
+    )
+  # --- Volcano Plot ---
+  df <- df %>%
+    mutate(
+      log2FC = log2FC_mean_adjusted_var_YO_combined,
+      FDR = !!sym(fdr_col),
+      neg_log10_FDR = -log10(pmax(FDR, 1e-300)),
+      significance = case_when(
+        FDR < fdr_cutoff & log2FC >  fc_cutoff ~ "↑O (Higher in Old)",
+        FDR < fdr_cutoff & log2FC < -fc_cutoff ~ "↑Y (Higher in Young)",
+        TRUE ~ "Not significant"
+      )
+    )
+  top_genes <- bind_rows(
+    df %>% filter(significance == "↑O (Higher in Old)") %>%
+      arrange(FDR, desc(log2FC)) %>% slice_head(n = 10),
+    df %>% filter(significance == "↑Y (Higher in Young)") %>%
+      arrange(FDR, log2FC) %>% slice_head(n = 10)
+  )
+  p_volcano <- ggplot(df, aes(x = log2FC, y = neg_log10_FDR, color = significance)) +
+    geom_point(alpha = 0.85, size = 2.5) +
+    geom_text_repel(data = top_genes, aes(label = gene),
+                    color = "black", size = 5,
+                    box.padding = 0.4, point.padding = 0.4, force = 3) +
+    geom_vline(xintercept = c(-fc_cutoff, fc_cutoff), linetype = "dashed", color = "grey40") +
+    geom_hline(yintercept = -log10(fdr_cutoff), linetype = "dashed", color = "grey40") +
+    coord_cartesian(xlim = c(-3, 3)) +
+    scale_color_manual(values = c(
+      "↑O (Higher in Old)" = "#D85B59",
+      "↑Y (Higher in Young)" = "#5271AE",
+      "Not significant" = "grey75"
+    )) +
+    theme_classic(base_size = 20) +
+    theme(
+      legend.position = "none",
+      axis.title.x = element_text(size = 22),
+      axis.text.x = element_text(size = 20),
+      axis.title.y = element_text(size = 22),
+      axis.text.y = element_text(size = 20)
+    ) +
+    labs(
+      #title = sprintf("%s: Volcano (Combined Y vs O)", prefix),
+      #subtitle = sprintf("FDR<%.2f | |log2FC|>%.2f | n=%d", fdr_cutoff, fc_cutoff, n_genes),
+      x = expression(log[2]("Mean-Adjusted Variance (O / Y)")),
+      y = expression(-log[10]("FDR"))
+    )
+  list(
+    mean_adjusted_variance_box = p_meanadjvar,
+    combined_box = p_combined_box,
+    volcano_allYO = p_volcano
+  )
+}
+
+# Apply the functions for exp1 data
+
+# --- Subset exp1 Seurat object ---
+hsc_exp1 <-subset(
+  seurat_vitro_exp1,
+  subset = celltype %in% c("LT-HSC", "ST-HSC")
+)
+hsc_exp1 # 18389 genes and 9478 cells
+table(hsc_exp1$sampleName)
+table(hsc_exp1$celltype)
+# --- Rename sampleName values ---
+hsc_exp1$sampleName <- dplyr::recode(
+  hsc_exp1$sampleName,
+  "1_Y2" = "Y2",
+  "2_Y3" = "Y3",
+  "3_Y4" = "Y4",
+  "4_O2" = "O2",
+  "5_O3" = "O3",
+  "6_O4" = "O4"
+)
+# --- Reorder the factor levels ---
+hsc_exp1$sampleName <- factor(
+  hsc_exp1$sampleName,
+  levels = c("Y2", "O2", "Y3", "O3", "Y4", "O4"),
+  ordered = TRUE
+)
+table(hsc_exp1$sampleName)
+# ---- Compute per-gene variance, CV, and log2 fold changes ----
+hsc_results_exp1 <- compute_variance_and_cv_YO_pairs_exp1(
+  seu = hsc_exp1,
+  assay = "RNA",
+  slot = "data",
+  group_col = "sampleName",
+  n_hvg = 2000,
+  min_pct = 0.1,
+  min_mean = 0.1
+) # 706 genes
+
+plots_exp1 <- plot_variance_cv_summaries_exp1(df = hsc_results_exp1, prefix = "Exp1_HSC")
+
+plots_exp1$mean_adjusted_variance_box
+plots_exp1$combined_box
+plots_exp1$volcano_allYO
+
 
 #####################################
 
-## Exp2 Y vs O DVGs 
+## Exp2 Y vs O DVGs
 
 #####################################
 
-## Modify the function to compute DVGs for Exp2 
+## Modify the function to compute DVGs for Exp2
 
 compute_variance_and_cv_YO_pairs_exp2 <- function(
     seu,
@@ -1548,69 +1924,73 @@ compute_variance_and_cv_YO_pairs_exp2 <- function(
   keep_genes <- names(which(detect_pct >= min_pct & mean_expr >= min_mean))
   expr <- expr[keep_genes, , drop = FALSE]
   message("Keeping ", length(keep_genes), " genes after filtering.")
-  # --- Mean & variance per group ---
+  
   groups <- levels(meta$AgeGroup)
-  mean_tbl <- map_dfc(groups, function(g) {
-    cells <- rownames(meta)[meta$AgeGroup == g]
-    apply(expr[, cells, drop = FALSE], 1, mean, na.rm = TRUE)
-  })
-  var_tbl <- map_dfc(groups, function(g) {
-    cells <- rownames(meta)[meta$AgeGroup == g]
-    apply(expr[, cells, drop = FALSE], 1, var, na.rm = TRUE)
-  })
-  colnames(mean_tbl) <- paste0("mean_", groups)
-  colnames(var_tbl)  <- paste0("var_",  groups)
+  idx_by_group <- lapply(groups, function(g) which(meta$AgeGroup == g))
+  names(idx_by_group) <- groups
+  
+  # --- Mean & variance per group ---
+  mean_by_group <- lapply(idx_by_group, function(idx) apply(expr[, idx, drop = FALSE], 1, mean, na.rm = TRUE))
+  var_by_group  <- lapply(idx_by_group, function(idx) apply(expr[, idx, drop = FALSE], 1, var, na.rm = TRUE))
+  mean_tbl <- as.data.frame(mean_by_group); colnames(mean_tbl) <- paste0("mean_", groups)
+  var_tbl  <- as.data.frame(var_by_group);  colnames(var_tbl)  <- paste0("var_",  groups)
   gene_stats <- bind_cols(gene = rownames(expr), mean_tbl, var_tbl)
-  # --- LOESS mean–variance correction (bias-stabilized) ---
-  long_stats <- gene_stats %>%
-    pivot_longer(cols = starts_with("mean_"), names_to = "mean_group", values_to = "mean") %>%
-    mutate(group = sub("^mean_", "", mean_group)) %>%
-    left_join(
-      gene_stats %>%
-        pivot_longer(cols = starts_with("var_"), names_to = "var_group", values_to = "var") %>%
-        mutate(group = sub("^var_", "", var_group)),
-      by = c("gene", "group")
-    ) %>%
+  
+  # --- Mean-variance trend (fit BEFORE testing, bias-stabilized LOESS on 5-95% quantiles) ---
+  trend_df <- data.frame(
+    mean = unlist(mean_by_group),
+    var  = unlist(var_by_group)
+  ) %>%
     mutate(
       log_mean = log10(pmax(mean, 1e-3)),   # floor to stabilize near-zero means
       log_var  = log10(pmax(var,  1e-4))    # floor to stabilize near-zero vars
     ) %>%
     filter(is.finite(log_mean), is.finite(log_var))
-  # --- Fit LOESS on 5–95% quantiles only ---
+  
   fit_loess <- loess(log_var ~ log_mean,
-                     data = long_stats %>%
+                     data = trend_df %>%
                        filter(between(log_mean,
                                       quantile(log_mean, 0.05, na.rm = TRUE),
                                       quantile(log_mean, 0.95, na.rm = TRUE))),
                      span = 0.75)
-  # --- LOESS prediction ---
-  predicted_logVar <- predict(fit_loess, newdata = data.frame(log_mean = long_stats$log_mean))
-  # Replace NA predictions (outside fit range) with boundary values
-  if (anyNA(predicted_logVar)) {
-    range_fit <- range(fit_loess$x, na.rm = TRUE)
-    low_val  <- predict(fit_loess, newdata = data.frame(log_mean = range_fit[1]))
-    high_val <- predict(fit_loess, newdata = data.frame(log_mean = range_fit[2]))
-    predicted_logVar[long_stats$log_mean < range_fit[1]] <- low_val
-    predicted_logVar[long_stats$log_mean > range_fit[2]] <- high_val
+  
+  expected_logvar <- function(mean_vec) {
+    log_mean_vec <- log10(pmax(mean_vec, 1e-3))
+    pred <- predict(fit_loess, newdata = data.frame(log_mean = log_mean_vec))
+    if (anyNA(pred)) {
+      range_fit <- range(fit_loess$x, na.rm = TRUE)
+      low_val  <- predict(fit_loess, newdata = data.frame(log_mean = range_fit[1]))
+      high_val <- predict(fit_loess, newdata = data.frame(log_mean = range_fit[2]))
+      pred[log_mean_vec < range_fit[1]] <- low_val
+      pred[log_mean_vec > range_fit[2]] <- high_val
+    }
+    pred
   }
-  # Compute residuals safely
-  long_stats$residual_logVar <- long_stats$log_var - predicted_logVar
-  # --- Summarize adjusted variance ---
-  resid_summary <- long_stats %>%
-    group_by(gene, group) %>%
-    summarise(mean_adjusted_var = mean(10 ^ residual_logVar, na.rm = TRUE), .groups = "drop") %>%
-    complete(gene, group = c("Y", "O")) %>%
-    pivot_wider(names_from = group, values_from = mean_adjusted_var,
-                names_glue = "mean_adjusted_var_{group}") %>%
-    filter(!(is.na(mean_adjusted_var_Y) & is.na(mean_adjusted_var_O)))
+  
+  scale_by_group <- lapply(mean_by_group, function(m) sqrt(10 ^ expected_logvar(m)))
+  
+  adj_expr <- expr
+  for (g in groups) {
+    adj_expr[, idx_by_group[[g]]] <- expr[, idx_by_group[[g]], drop = FALSE] / scale_by_group[[g]]
+  }
+  
+  # --- Mean-adjusted variance (from the same adjusted values used for testing) ---
+  mean_adjusted_var <- lapply(groups, function(g) {
+    apply(adj_expr[, idx_by_group[[g]], drop = FALSE], 1, var, na.rm = TRUE)
+  })
+  names(mean_adjusted_var) <- groups
+  resid_summary <- data.frame(gene = rownames(expr))
+  for (g in groups) {
+    resid_summary[[paste0("mean_adjusted_var_", g)]] <- mean_adjusted_var[[g]]
+  }
   # --- Add log2FC (O/Y) ---
   resid_summary <- resid_summary %>%
     mutate(log2FC_mean_adjusted_variance_YO =
              log2((mean_adjusted_var_O + 1e-8) / (mean_adjusted_var_Y + 1e-8)))
-  # --- Brown–Forsythe test (Y vs O) ---
+  # --- Brown–Forsythe test (Y vs O), run on trend-adjusted expression ---
   message("Running Brown–Forsythe variance test (Y vs O)...")
   res_df <- map_dfr(rownames(expr), function(g) {
-    df_test <- data.frame(val = expr[g, ], grp = meta$AgeGroup)
+    df_test <- data.frame(val = adj_expr[g, ], grp = meta$AgeGroup)
     df_test <- df_test[!is.na(df_test$val), ]
     if (length(unique(df_test$grp)) < 2) return(tibble(gene = g, p_bf = NA))
     p_bf <- tryCatch(car::leveneTest(val ~ grp, data = df_test, center = median)[1, "Pr(>F)"], error = function(e) NA)
@@ -1625,12 +2005,12 @@ compute_variance_and_cv_YO_pairs_exp2 <- function(
   # --- Direction check ---
   dir_check <- mean(sign(merged$mean_adjusted_var_O - merged$mean_adjusted_var_Y) ==
                       sign(merged$log2FC_mean_adjusted_variance_YO), na.rm = TRUE)
-  message(sprintf("🔍 Direction consistency: %.1f%% genes match expected O/Y direction", dir_check * 100))
+  message(sprintf("Direction consistency: %.1f%% genes match expected O/Y direction", dir_check * 100))
   message("Finished Exp2 Y–O variance computation (bias-stabilized, NA-safe).")
   return(merged)
 }
 
-# Plot function for Exp2 
+# Plot function for Exp2
 
 plot_variance_cv_summaries_exp2 <- function(
     df,
@@ -1751,7 +2131,7 @@ plot_variance_cv_summaries_exp2 <- function(
 hsc_exp2 <- subset(seurat_vitro_exp2, celltype %in% c("LT-HSC", "ST-HSC"))
 table(hsc_exp2$sampleName)
 # filter out unrelated/ technical genes
-hsc_exp2 <- filter_unrelated_genes(hsc_exp2) # 13617 genes 
+hsc_exp2 <- filter_unrelated_genes(hsc_exp2) # 13617 genes
 # Compute aggregated variance–CV table (Y vs O)
 exp2_HSC_results <- compute_variance_and_cv_YO_pairs_exp2(hsc_exp2) # 782 genes
 View(exp2_HSC_results)
@@ -1759,7 +2139,7 @@ View(exp2_HSC_results)
 # Pick aging-up HVGs (positive FC, O > Y)
 aging_up_genes <- exp2_HSC_results %>%
   filter(log2FC_mean_adjusted_variance_YO > 0, fdr_brown_forsythe_All_YO < 0.05)
-nrow(aging_up_genes) # 256
+nrow(aging_up_genes) # 183
 # Select Top200 / Top100 aging-up genes
 hsc_results_exp2_up_top200 <- aging_up_genes %>%
   arrange(fdr_brown_forsythe_All_YO) %>%
@@ -1768,7 +2148,7 @@ hsc_results_exp2_up_top100 <- aging_up_genes %>%
   arrange(fdr_brown_forsythe_All_YO) %>%
   slice_head(n = 100)
 
-# Plot 
+# Plot
 plots_exp2_all_cv <- plot_variance_cv_summaries_exp2(
   df = exp2_HSC_results,
   fc_cutoff = 0.1,
@@ -1776,7 +2156,7 @@ plots_exp2_all_cv <- plot_variance_cv_summaries_exp2(
 )
 plots_exp2_all_cv$density
 plots_exp2_all_cv$volcano
-# Top 100 DVGs plot 
+# Top 100 DVGs plot
 plots_exp2_top100_cv <- plot_variance_cv_summaries_exp2(
   df = hsc_results_exp2_up_top200,
   prefix = "Exp2_HSC – Top 100 Aging-Up DVGs"
@@ -1791,16 +2171,17 @@ plots_exp2_top100_cv$mean_adjusted_variance_box
 plots_exp2_top100_cv$volcano
 plots_exp2_top100_cv$density
 
-#### Save DVG tables from the 3 Exp #### 
-# Cross Vitro DVGs 
+#### Save DVG tables from the 3 Exp ####
+# Cross Vitro DVGs
 Day0_hsc_dvgs_results$fdr_brown_forsythe
 Day0_hsc_dvgs_results$log2FC_mean_adjusted_variance
 # Unmanipulated DVGs
 unmanipulated_results$fdr_brown_forsythe
 unmanipulated_results$log2FC_mean_adjusted_var_old_young
-# Exp2 DVGs 
+# Exp2 DVGs
 exp2_HSC_results$fdr_brown_forsythe_All_YO
 exp2_HSC_results$log2FC_mean_adjusted_variance_YO
+
 
 ############################################################
 # 1 Standardize tables
@@ -1864,7 +2245,46 @@ meta_table <- bind_rows(cross_sig %>% filter(gene %in% shared_genes) %>%
                         exp2_sig %>% filter(gene %in% shared_genes) %>% mutate(Experiment = "Exp2")) %>% arrange(gene)
 
 ############################################################
-# 7 Write Excel
+# 7 Consensus DVGs (significant in >=2 of 3 experiments) at two FC thresholds
+############################################################
+
+build_consensus_table <- function(fc_cutoff) {
+  cross_sig_fc   <- cross_tbl   %>% filter(fdr_brown_forsythe        < 0.05, log2FC_mean_adjusted_variance_OY >= fc_cutoff)
+  unmanip_sig_fc <- unmanip_tbl %>% filter(fdr_brown_forsythe        < 0.05, log2FC_mean_adjusted_variance_OY >= fc_cutoff)
+  exp2_sig_fc    <- exp2_tbl    %>% filter(fdr_brown_forsythe        < 0.05, log2FC_mean_adjusted_variance_OY >= fc_cutoff)
+  
+  gene_list_fc <- list(Cross = cross_sig_fc$gene, Unmanipulated = unmanip_sig_fc$gene, Exp2 = exp2_sig_fc$gene)
+  gene_counts_fc <- table(unlist(gene_list_fc))
+  consensus_genes_fc <- names(gene_counts_fc[gene_counts_fc >= 2])
+  
+  cross_wide <- cross_tbl %>%
+    filter(gene %in% consensus_genes_fc) %>%
+    dplyr::rename(fdr_Cross = fdr_brown_forsythe, log2FC_Cross = log2FC_mean_adjusted_variance_OY)
+  unmanip_wide <- unmanip_tbl %>%
+    filter(gene %in% consensus_genes_fc) %>%
+    dplyr::rename(fdr_Unmanipulated = fdr_brown_forsythe, log2FC_Unmanipulated = log2FC_mean_adjusted_variance_OY)
+  exp2_wide <- exp2_tbl %>%
+    filter(gene %in% consensus_genes_fc) %>%
+    dplyr::rename(fdr_Exp2 = fdr_brown_forsythe, log2FC_Exp2 = log2FC_mean_adjusted_variance_OY)
+  
+  purrr::reduce(
+    list(cross_wide, unmanip_wide, exp2_wide),
+    dplyr::full_join, by = "gene"
+  ) %>%
+    mutate(
+      n_experiments_significant =
+        (!is.na(fdr_Cross) & fdr_Cross < 0.05 & log2FC_Cross >= fc_cutoff) +
+        (!is.na(fdr_Unmanipulated) & fdr_Unmanipulated < 0.05 & log2FC_Unmanipulated >= fc_cutoff) +
+        (!is.na(fdr_Exp2) & fdr_Exp2 < 0.05 & log2FC_Exp2 >= fc_cutoff)
+    ) %>%
+    arrange(desc(n_experiments_significant), gene)
+}
+
+consensus_2of3_fc0.05 <- build_consensus_table(0.05)
+consensus_2of3_fc0.1  <- build_consensus_table(0.1)
+
+############################################################
+# 8 Write Excel
 ############################################################
 
 wb <- createWorkbook()
@@ -1884,33 +2304,26 @@ addWorksheet(wb, "Summary_Shared_Genes")
 writeData(wb, "Summary_Shared_Genes", summary_table)
 addWorksheet(wb, "Meta_Shared_Genes")
 writeData(wb, "Meta_Shared_Genes", meta_table)
-saveWorkbook(wb,"/project2/sli68423_1316/users/Qiuyang/Qiuyang_Zhang/cell_tag/Celltag_main_scripts/Main_figures/Figure3/Tables/Fig3_DVG_Master_Table.xlsx",overwrite = TRUE)
+addWorksheet(wb, "Consensus_2of3_FC0.05")
+writeData(wb, "Consensus_2of3_FC0.05", consensus_2of3_fc0.05)
+addWorksheet(wb, "Consensus_2of3_FC0.1")
+writeData(wb, "Consensus_2of3_FC0.1", consensus_2of3_fc0.1)
+saveWorkbook(wb,".../Fig3_DVG_Master_Table.xlsx",overwrite = TRUE)
+
+############################################################
+
 
 ##################################################################
 
-
 ##################################################################
 
-# Visualized per-gene experssion and mean-adj variance 
+# Visualized per-gene experssion and mean-adj variance
 
-# 80 gene list 
-genes_of_interest <- c(
-  "Aldh1a1","Nupr1","Slamf1","Cdkn2c","Cd48","Slc14a1","Otos","Krt18","Apoe","Hmgb2",
-  "Cavin3","Nkx2-3","Prkca","Ran","Tubb5","Mki67","Birc5","Tespa1","Top2a","Gng11",
-  "Cdkn1a","Txnip","Ncl","Zmat3","Serpinb1a","Xbp1","Ccnd1","Tubb4b","Slc22a3","Pclaf",
-  "Ybx1","Cks1b","Cdca8","Mid1","Cenpv","Lgals1","Lgals9","Hacd4","H1fx","Nrgn",
-  "Smc4","Nfia","Ptms","Tuba1b","Rora","Smc2","Myl10","Cdk1","Fbxo5","Ccna2",
-  "Pbk","Plek","Alcam","Cks2","Anln","Esco2","Cd53","Ube2s","Knl1","Hbb-bt",
-  "Incenp","Frat2","Kif20b","Procr","Neat1","Dlgap5","Ccng1","Hspe1","Tnip3","Adgrg3",
-  "Ckap2l","Slfn9","Pbx1","Sgo1","Racgap1","Brip1","Snhg3","Cycs","Retreg1","Clec4d")
+# gene list: consensus DVGs (significant in >=2 of 3 experiments), FC >= 0.05
+genes_of_interest_fc0.05 <- consensus_2of3_fc0.05$gene
 
-# 33 gene list 
-genes_of_interest <- c(
-  "Nupr1","Slamf1","Cd48","Otos","Krt18","Apoe","Hmgb2","Cavin3",
-  "Nkx2-3","Txnip","Ran","Tubb5","Mki67","Birc5","Tespa1","Top2a",
-  "Gng11","Cdkn1a","Hacd4","Smc4","Serpinb1a","Xbp1","Ccnd1",
-  "Tubb4b","Slc22a3","Ybx1","Cdca8","H1fx","Ptms","Smc2","Cks2",
-  "Esco2","Cd53")
+# gene list: consensus DVGs (significant in >=2 of 3 experiments), FC >= 0.1
+genes_of_interest_fc0.1 <- consensus_2of3_fc0.1$gene
 
 plot_density_gene <- function(
     seurat_obj,
@@ -1947,7 +2360,7 @@ plot_density_gene <- function(
     mutate(Expression = .data[[gene]]) %>%
     filter(Expression > 0) %>%
     mutate(
-      Group = factor(Group, levels = c("Y", "O"), ordered = TRUE) 
+      Group = factor(Group, levels = c("Y", "O"), ordered = TRUE)
     )
   color_palette <- c(
     "Y" = "#89AEEB",
@@ -1979,7 +2392,7 @@ plot_density_gene <- function(
     
     mean_var_df <- tibble(
       Group = factor(c("Y", "O"),
-                     levels = c("Y", "O")), 
+                     levels = c("Y", "O")),
       MeanAdjVar = c(
         var_vals[[mean_adj_var_Y_col]][1],
         var_vals[[mean_adj_var_O_col]][1]
@@ -2017,7 +2430,7 @@ make_4panel_for_gene <- function(gene){
     old_labels   = c("old","O"),
     title_prefix = "Unmanipulated HSCs",
     dvgs_df = unmanipulated_results,
-    mean_adj_var_Y_col = 'mean_adjusted_var_young', 
+    mean_adj_var_Y_col = 'mean_adjusted_var_young',
     mean_adj_var_O_col = 'mean_adjusted_var_old'
   )
   p_vitro <- plot_density_gene(
@@ -2029,15 +2442,6 @@ make_4panel_for_gene <- function(gene){
     title_prefix = "Day0 In Vitro HSCs",
     dvgs_df = Day0_hsc_dvgs_results
   )
-  p_exp1 <- plot_density_gene(
-    seurat_obj   = hsc_exp1,
-    gene         = gene,
-    group_col    = "sampleName",
-    young_labels = c("Y2","Y3","Y4"),
-    old_labels   = c("O2","O3","O4"),
-    title_prefix = "Exp1 HSCs",
-    dvgs_df      = hsc_results_exp1
-  )
   p_exp2 <- plot_density_gene(
     seurat_obj   = hsc_exp2,
     gene         = gene,
@@ -2048,29 +2452,40 @@ make_4panel_for_gene <- function(gene){
     dvgs_df      = exp2_HSC_results
   )
   combined_panel <- (p_unman | p_vitro) /
-    (p_exp1 | p_exp2)
+    p_exp2
   
   return(combined_panel)
 }
 
-panel_list <- lapply(genes_of_interest, make_4panel_for_gene)
-names(panel_list) <- genes_of_interest
+panel_list_fc0.05 <- lapply(genes_of_interest_fc0.05, make_4panel_for_gene)
+names(panel_list_fc0.05) <- genes_of_interest_fc0.05
 
-pdf("Figure3/Figures/DensityPanels_DVG_0.05FC_80_Genes.pdf", width = 15, height = 12)
-for(g in genes_of_interest){
-  if(!is.null(panel_list[[g]])){
-    print(panel_list[[g]])
+pdf(".../DensityPanels_DVG_FC0.05_Consensus2of3.pdf", width = 15, height = 12)
+for(g in genes_of_interest_fc0.05){
+  if(!is.null(panel_list_fc0.05[[g]])){
+    print(panel_list_fc0.05[[g]])
+  }
+}
+dev.off()
+
+panel_list_fc0.1 <- lapply(genes_of_interest_fc0.1, make_4panel_for_gene)
+names(panel_list_fc0.1) <- genes_of_interest_fc0.1
+
+pdf(".../DensityPanels_DVG_FC0.1_Consensus2of3.pdf", width = 15, height = 12)
+for(g in genes_of_interest_fc0.1){
+  if(!is.null(panel_list_fc0.1[[g]])){
+    print(panel_list_fc0.1[[g]])
   }
 }
 dev.off()
 
 #####################################################################################
 
+#####################################################################################
+
+
 # DEG for DVGs
 
-# Cross
-                    
-table(seurat_in_vitro_HSC$sampleName)
 deg_vitro <- run_clonewise_DEG_suite(
   seurat_obj = seurat_in_vitro_HSC,
   clone_set1_ids = "O_vitro",   # Group1 = Old
@@ -2082,31 +2497,118 @@ deg_vitro <- run_clonewise_DEG_suite(
   fdr_cutoff = 0.05,
   excel_name  = "Cross__Old_vs_Young_vitro_DEG.xlsx",
   volcano_name = "Cross__Old_vs_Young_vitro_DEG_Volcano.png",
-  output_dir = "Cross_Vitro_DEG_Results"
+  output_dir = ".../Cross_Vitro_DEG_Results"
 )
 
 View(deg_vitro$results$DEG2_TopHVGs_MAST)
 deg_vitro$volcano_plot
 
-# Exp2 
-
-table(hsc_exp2$AgeGroup)
-deg_exp2_vitro <- run_clonewise_DEG_suite(
-  seurat_obj = hsc_exp2,
-  clone_set1_ids = "Old",
-  clone_set2_ids = "Young",
-  clone_col = "AgeGroup",
-  group1_label = "Old_vitro",
-  group2_label = "Young_vitro",
+# DEG for Unmanipulated (Old vs Young)
+deg_unmanip <- run_clonewise_DEG_suite(
+  seurat_obj = seurat_unmanipulated_HSC,
+  clone_set1_ids = "old",     # Group1 = Old
+  clone_set2_ids = "young",   # Group2 = Young
+  clone_col = "AGE",
+  group1_label = "Old_unmanip",
+  group2_label = "Young_unmanip",
   fc_cutoff  = 0.25,
   fdr_cutoff = 0.05,
-  excel_name  = "Exp2_Old_vs_Young_vitro_DEG.xlsx",
-  volcano_name = "Exp2_Old_vs_Young_vitro_DEG_Volcano.png",
-  output_dir = "Exp2_Vitro_DEG_Results"
+  excel_name  = "Unmanipulated__Old_vs_Young_DEG.xlsx",
+  volcano_name = "Unmanipulated__Old_vs_Young_DEG_Volcano.png",
+  output_dir = ".../Unmanipulated_DEG_Results"
 )
 
-View(deg_exp2_vitro$results$DEG2_TopHVGs_MAST)
-deg_exp2_vitro$volcano_plot
+View(deg_unmanip$results$DEG2_TopHVGs_MAST)
+deg_unmanip$volcano_plot
+
+# DEG for Exp2 (Old vs Young)
+deg_exp2 <- run_clonewise_DEG_suite(
+  seurat_obj = hsc_exp2,
+  clone_set1_ids = c("4_Oa","5_Oa","6_Oa"),   # Group1 = Old
+  clone_set2_ids = c("1_Ya","2_Ya","3_Ya"),   # Group2 = Young
+  clone_col = "sampleName",
+  group1_label = "Old_exp2",
+  group2_label = "Young_exp2",
+  fc_cutoff  = 0.25,
+  fdr_cutoff = 0.05,
+  excel_name  = "Exp2__Old_vs_Young_DEG.xlsx",
+  volcano_name = "Exp2__Old_vs_Young_DEG_Volcano.png",
+  output_dir = ".../Exp2_DEG_Results"
+)
+
+View(deg_exp2$results$DEG2_TopHVGs_MAST)
+deg_exp2$volcano_plot
+
+#####################################################################################
+
+#####################################################################################
+
+# DEG vs DVG overlap 
+
+extract_deg_genes <- function(deg_df, fdr_cutoff = 0.05, fc_cutoff = 0.25) {
+  df <- deg_df
+  if (!"gene" %in% colnames(df)) df$gene <- rownames(df)
+  fdr_col <- intersect(c("p_val_adj", "padj", "FDR", "fdr"), colnames(df))[1]
+  fc_col  <- intersect(c("avg_log2FC", "avg_logFC", "log2FC", "logFC"), colnames(df))[1]
+  stopifnot(!is.na(fdr_col), !is.na(fc_col))
+  df %>%
+    filter(.data[[fdr_col]] < fdr_cutoff, .data[[fc_col]] >= fc_cutoff) %>%
+    pull(gene)
+}
+
+deg_genes_cross    <- extract_deg_genes(deg_vitro$results$DEG3_FilteredHVGs_MAST)
+deg_genes_unmanip  <- extract_deg_genes(deg_unmanip$results$DEG3_FilteredHVGs_MAST)
+deg_genes_exp2     <- extract_deg_genes(deg_exp2$results$DEG3_FilteredHVGs_MAST)
+
+# Significant, aging-up DVGs per experiment 
+
+build_overlap_counts <- function(deg_genes, dvg_genes, experiment_label) {
+  shared   <- intersect(deg_genes, dvg_genes)
+  deg_only <- setdiff(deg_genes, dvg_genes)
+  dvg_only <- setdiff(dvg_genes, deg_genes)
+  tibble(
+    Experiment = experiment_label,
+    Category = c("DEG", "Shared", "DVG"),
+    Count = c(length(deg_only), length(shared), length(dvg_only))
+  )
+}
+
+overlap_counts <- bind_rows(
+  build_overlap_counts(deg_genes_cross,   dvg_genes_cross,   "Exp1"),
+  build_overlap_counts(deg_genes_unmanip, dvg_genes_unmanip, "Unmanipulated"),
+  build_overlap_counts(deg_genes_exp2,    dvg_genes_exp2,    "Exp2")
+) %>%
+  mutate(
+    Experiment = factor(Experiment, levels = c("Exp1", "Exp2", "Unmanipulated")),
+    # Level order below + default position_stack() puts Shared at the top of
+    # the bar, DVG in the middle, DEG at the bottom.
+    Category = factor(Category, levels = c("Shared", "DVG", "DEG"))
+  )
+
+p_deg_dvg_overlap <- ggplot(overlap_counts, aes(x = Experiment, y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 0.6, color = "black") +
+  scale_fill_manual(values = c(
+    "DEG" = "#D95F02",
+    "Shared" = "#1B9E77",
+    "DVG" = "#7570B3"
+  )) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
+  theme_classic(base_size = 18) +
+  theme(
+    axis.line = element_line(color = "black", linewidth = 1),
+    axis.ticks = element_line(color = "black"),
+    axis.title = element_text(face = "bold", color = "black"),
+    axis.text  = element_text(color = "black"),
+    legend.title = element_blank()
+  ) +
+  labs(
+    title = "Aging-Up DVG vs DEG Overlap",
+    x = NULL,
+    y = "Number of genes"
+  )
+
+p_deg_dvg_overlap
+
 
 ####################################################################################
-# End of this script 
+# End of this script
