@@ -50,7 +50,7 @@ Typical setup time: less than 10 minutes.
 | `Figure3/Figure3_bcegh_DVGs_3_data_function.R` | Fig 3b, 3c, 3e, 3g, 3h |
 | `Figure3/Figure3_fi_GSEA_Day0_Unmani.R` | Fig 3f, 3i |
 | `Figure3/Figure 3k.R` | Fig 3k |
-| `Figure3/Figure3_lmno_human_ORA_PROGENy.R` | Fig 3l, 3m, 3n, 3o |
+| `Figure3/Figure3_lmno_human_ORA_PROGENy.R` | Fig 3l, 3m, 3n, 3o; Fig 5k |
 | `Figure4/Panel A.R` | Fig 4a |
 | `Figure4/Panel B.R` | Fig 4b |
 | `Figure4/Panel C.R` | Fig 4c |
